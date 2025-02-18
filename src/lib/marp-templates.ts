@@ -43,9 +43,9 @@ class PositionTrackingMarp extends Marp {
     };
   }
 
-  render(markdown: string) {
+  render(markdown: string, env?: any): { html: string; css?: string; comments?: object[] } {
     this.positions = [];
-    return super.render(markdown);
+    return super.render(markdown, env);
   }
 }
 
