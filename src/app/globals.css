@@ -17,5 +17,154 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+.preview-container {
+  @apply prose prose-sm max-w-none dark:prose-invert;
+}
+
+.preview-container h1 {
+  @apply text-2xl font-bold mb-4;
+}
+
+.preview-container h2 {
+  @apply text-xl font-semibold mb-3;
+}
+
+.preview-container h3 {
+  @apply text-lg font-medium mb-2;
+}
+
+.preview-container ul {
+  @apply list-disc list-inside mb-4;
+}
+
+.preview-container p {
+  @apply mb-4;
+}
+
+/* スクロールバーのスタイル */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4B5563;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6B7280;
+}
+
+/* Marpスライドのスタイル */
+.marpit {
+  font-family: 'Arial', 'Helvetica', sans-serif;
+}
+
+/* スライド間の余白 */
+.marpit section {
+  margin-bottom: 1.5rem !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 0.5rem;
+  padding: 2rem !important;
+  background-color: rgb(255 255 255 / 0.97);
+  transform: scale(0.9);
+  transform-origin: top center;
+}
+
+.marpit section:last-child {
+  margin-bottom: 1.5rem !important;
+}
+
+/* スライドの内部余白 */
+.marpit section > * {
+  margin-bottom: 1rem !important;
+}
+
+.marpit section > *:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* スライドのページ番号 */
+.marpit section::after {
+  content: attr(data-marpit-pagination);
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.marpit h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+.marpit h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #1f2937;
+}
+
+.marpit h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: #374151;
+}
+
+.marpit p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.marpit ul, .marpit ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.marpit li {
+  margin-bottom: 0.25rem;
+}
+
+.marpit table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.marpit th, .marpit td {
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem;
+}
+
+.marpit th {
+  background-color: #f9fafb;
+}
+
+@layer utilities {
+  .animate-gradient-x {
+    background-size: 200% 100%;
+    animation: gradient-x 15s ease infinite;
+  }
+}
+
+@keyframes gradient-x {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
