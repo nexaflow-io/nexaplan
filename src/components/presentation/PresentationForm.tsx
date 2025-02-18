@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { generateSlides, generateAISlides } from '@/lib/marp-templates';
-import { useForm } from 'react-hook-form';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import CodeMirror from '@uiw/react-codemirror';
@@ -16,6 +15,12 @@ interface ElementPosition {
   start: number;
   end: number;
   text: string;
+}
+
+interface CodeMirrorRef {
+  editor?: {
+    focus: () => void;
+  };
 }
 
 const defaultContent = `---
@@ -87,7 +92,7 @@ export default function PresentationForm({ shouldGenerateAI = false, topic = nul
   const [html, setHtml] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState(0);
-  const editorCodeMirrorRef = useRef<any>(null);
+  const editorCodeMirrorRef = useRef<CodeMirrorRef>(null);
   const fullscreenRef = useRef<HTMLDivElement>(null);
   const [positions, setPositions] = useState<ElementPosition[]>([]);
   const [isPreviewHoverEnabled, setIsPreviewHoverEnabled] = useState(true);
@@ -146,7 +151,7 @@ export default function PresentationForm({ shouldGenerateAI = false, topic = nul
     }
   }, [searchParams])
 
-  const handleAIGenerate = async (topic: string) => {
+  const handleAIGenerate = useCallback(async (topic: string) => {
     try {
       setIsGenerating(true);
       setGenerationStep(1)
@@ -165,7 +170,13 @@ export default function PresentationForm({ shouldGenerateAI = false, topic = nul
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (shouldGenerateAI && topic) {
+      handleAIGenerate(topic);
+    }
+  }, [shouldGenerateAI, topic, handleAIGenerate]);
 
   const handleNewPresentation = useCallback(() => {
     setMarkdown(defaultContent);
@@ -205,32 +216,32 @@ export default function PresentationForm({ shouldGenerateAI = false, topic = nul
       const pos = positions[parseInt(position)];
       if (pos) {
         try {
-          const view = editorCodeMirrorRef.current.view;
-          const doc = view.state.doc;
+          const view = editorCodeMirrorRef.current.editor?.focus();
+          const doc = view?.state.doc;
 
           // 対象の行を取得
-          const line = doc.line(pos.start + 1);
+          const line = doc?.line(pos.start + 1);
 
           // カーソルを行の先頭に移動
-          view.dispatch({
+          view?.dispatch({
             selection: {
-              anchor: line.from,
-              head: line.from
+              anchor: line?.from,
+              head: line?.from
             }
           });
 
           // スクロール位置を計算
-          const coords = view.coordsAtPos(line.from);
+          const coords = view?.coordsAtPos(line?.from);
           if (coords) {
-            const editorRect = view.dom.getBoundingClientRect();
-            const scrollParent = view.scrollDOM;
-            const viewportHeight = scrollParent.clientHeight;
+            const editorRect = view?.dom.getBoundingClientRect();
+            const scrollParent = view?.scrollDOM;
+            const viewportHeight = scrollParent?.clientHeight;
 
-            const targetY = coords.top - editorRect.top + scrollParent.scrollTop;
+            const targetY = coords.top - editorRect.top + scrollParent?.scrollTop;
             const scrollTop = targetY - viewportHeight / 3;
 
             // スムーズにスクロール
-            scrollParent.scrollTo({
+            scrollParent?.scrollTo({
               top: Math.max(0, scrollTop),
               behavior: 'smooth'
             });

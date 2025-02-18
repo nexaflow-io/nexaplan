@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 
 interface Particle {
   x: number;
@@ -125,7 +125,7 @@ export const ParticleBackground = () => {
     }
   };
 
-  const animate = () => {
+  const animate = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
 
@@ -153,7 +153,7 @@ export const ParticleBackground = () => {
     });
 
     animationFrameId.current = requestAnimationFrame(animate);
-  };
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;

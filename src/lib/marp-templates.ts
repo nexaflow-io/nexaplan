@@ -1,4 +1,4 @@
-import { Marp, HTMLAsArray } from '@marp-team/marp-core';
+import { Marp } from '@marp-team/marp-core';
 
 interface ElementPosition {
   start: number;
