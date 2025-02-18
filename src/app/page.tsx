@@ -23,7 +23,7 @@ export default function Home() {
     <main className="h-screen overflow-hidden">
       <ParticleBackground />
       <div className="container mx-auto px-4 h-full">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-gray-900/50 to-transparent"></div>
         
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
