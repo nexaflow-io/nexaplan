@@ -1,4 +1,4 @@
-import { Marp } from '@marp-team/marp-core';
+import { Marp, HTMLAsArray } from '@marp-team/marp-core';
 
 interface ElementPosition {
   start: number;
@@ -43,7 +43,7 @@ class PositionTrackingMarp extends Marp {
     };
   }
 
-  render(markdown: string, env?: any) {
+  render(markdown: string, env?: HTMLAsArray) {
     this.positions = [];
     return super.render(markdown, env);
   }
