@@ -266,10 +266,10 @@ const PresentationForm: React.FC<PresentationFormProps> = ({
     };
   }, []);
 
-  const handleElementHover = useCallback((event: MouseEvent) => {
+  const handleElementHover = useCallback((event: Event) => {
     if (!isPreviewHoverEnabled) return;
 
-    const target = event.target as HTMLElement;
+    const target = (event as MouseEvent).target as HTMLElement;
     const position = target.getAttribute('data-position');
     if (position && editorCodeMirrorRef.current) {
       const pos = positions[parseInt(position)];
