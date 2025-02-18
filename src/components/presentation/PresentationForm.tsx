@@ -461,9 +461,9 @@ const PresentationForm: React.FC<PresentationFormProps> = ({
               <div 
                 className="w-full h-full p-6"
                 style={{
-                  '--slide-width': '100%',
-                  '--slide-height': 'auto',
-                  '--content-width': 'min(calc(100% - 48px), 1200px)',
+                  ['--slide-width' as string]: '100%',
+                  ['--slide-height' as string]: 'auto',
+                  ['--content-width' as string]: 'min(calc(100% - 48px), 1200px)',
                 }}
                 dangerouslySetInnerHTML={{ __html: html }}
               />
