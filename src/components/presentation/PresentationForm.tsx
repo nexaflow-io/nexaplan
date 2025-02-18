@@ -94,7 +94,6 @@ export default function PresentationForm({ shouldGenerateAI = false, topic = nul
   const [generationStep, setGenerationStep] = useState(0);
   const editorCodeMirrorRef = useRef<CodeMirrorRef>(null);
   const fullscreenRef = useRef<HTMLDivElement>(null);
-  const [positions, setPositions] = useState<ElementPosition[]>([]);
   const [isPreviewHoverEnabled, setIsPreviewHoverEnabled] = useState(true);
 
   const searchParams = useSearchParams();
@@ -178,49 +177,20 @@ export default function PresentationForm({ shouldGenerateAI = false, topic = nul
     }
   }, [shouldGenerateAI, topic, handleAIGenerate]);
 
-  const handleNewPresentation = useCallback(() => {
-    setMarkdown(defaultContent);
-    try {
-      const result = await generateSlides({ markdown: defaultContent });
-      setHtml(result.html);
-    } catch (error) {
-      console.error('Error creating new presentation:', error);
-    }
-  }, []);
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      fullscreenRef.current?.requestFullscreen();
-    } else {
-      document.exitFullscreen();
-    }
-  };
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      const isFullscreen = !!document.fullscreenElement;
-    };
-
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-    };
-  }, []);
-
   const handleElementHover = useCallback((event: Event) => {
     if (!isPreviewHoverEnabled) return;
 
     const target = (event as MouseEvent).target as HTMLElement;
     const position = target.getAttribute('data-position');
     if (position && editorCodeMirrorRef.current) {
-      const pos = positions[parseInt(position)];
+      const pos = position;
       if (pos) {
         try {
           const view = editorCodeMirrorRef.current.editor?.focus();
           const doc = view?.state.doc;
 
           // 対象の行を取得
-          const line = doc?.line(pos.start + 1);
+          const line = doc?.line(parseInt(pos) + 1);
 
           // カーソルを行の先頭に移動
           view?.dispatch({
@@ -251,7 +221,7 @@ export default function PresentationForm({ shouldGenerateAI = false, topic = nul
         }
       }
     }
-  }, [positions, isPreviewHoverEnabled]);
+  }, [isPreviewHoverEnabled]);
 
   useEffect(() => {
     const preview = document.querySelector('.marpit');
@@ -261,15 +231,11 @@ export default function PresentationForm({ shouldGenerateAI = false, topic = nul
     }
   }, [handleElementHover]);
 
-  const onSubmit = async (data: { idea: string }) => {
-    try {
-      const result = await generateSlides({ 
-        markdown: defaultContent + data.idea
-      });
-      setMarkdown(defaultContent + data.idea);
-      setHtml(result.html);
-    } catch (error) {
-      console.error('Error generating presentation:', error);
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      fullscreenRef.current?.requestFullscreen();
+    } else {
+      document.exitFullscreen();
     }
   };
 
