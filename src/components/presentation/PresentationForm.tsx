@@ -13,7 +13,26 @@ interface PresentationFormProps {
 
 interface CodeMirrorRef {
   editor?: {
-    focus: () => void;
+    focus: () => {
+      state: {
+        doc: {
+          line: (n: number) => {
+            from: number;
+            to: number;
+          };
+        };
+      };
+      dispatch: (options: unknown) => void;
+      coordsAtPos: (pos: number) => { top: number; bottom: number; left: number; right: number; };
+      dom: {
+        getBoundingClientRect: () => DOMRect;
+      };
+      scrollDOM: {
+        clientHeight: number;
+        scrollTop: number;
+        scrollTo: (options: { top: number; behavior: string; }) => void;
+      };
+    };
   };
 }
 
