@@ -214,20 +214,23 @@ export default function PresentationForm({ shouldGenerateAI = false, topic = nul
           });
 
           // スクロール位置を計算
-          const coords = view?.coordsAtPos(line?.from);
-          if (coords) {
-            const editorRect = view?.dom.getBoundingClientRect();
-            const scrollParent = view?.scrollDOM;
-            const viewportHeight = scrollParent?.clientHeight;
+          const from = line?.from;
+          if (from !== undefined) {
+            const coords = view?.coordsAtPos(from);
+            if (coords) {
+              const editorRect = view?.dom.getBoundingClientRect();
+              const scrollParent = view?.scrollDOM;
+              const viewportHeight = scrollParent?.clientHeight;
 
-            const targetY = coords.top - editorRect.top + scrollParent?.scrollTop;
-            const scrollTop = targetY - viewportHeight / 3;
+              const targetY = coords.top - editorRect.top + scrollParent?.scrollTop;
+              const scrollTop = targetY - viewportHeight / 3;
 
-            // スムーズにスクロール
-            scrollParent?.scrollTo({
-              top: Math.max(0, scrollTop),
-              behavior: 'smooth'
-            });
+              // スムーズにスクロール
+              scrollParent?.scrollTo({
+                top: Math.max(0, scrollTop),
+                behavior: 'smooth'
+              });
+            }
           }
         } catch (error) {
           console.error('Failed to scroll to position:', error);
