@@ -12,7 +12,7 @@ class PositionTrackingMarp extends Marp {
   constructor(opts?: any) {
     super(opts);
 
-    this.markdown.renderer.rules.paragraph_open = (tokens, idx) => {
+    this.markdown.renderer.rules.paragraph_open = (tokens: any[], idx: number) => {
       const token = tokens[idx];
       const position = this.positions.length;
       
@@ -27,7 +27,7 @@ class PositionTrackingMarp extends Marp {
       return `<p data-position="${position}">`;
     };
 
-    this.markdown.renderer.rules.heading_open = (tokens, idx) => {
+    this.markdown.renderer.rules.heading_open = (tokens: any[], idx: number) => {
       const token = tokens[idx];
       const position = this.positions.length;
       
