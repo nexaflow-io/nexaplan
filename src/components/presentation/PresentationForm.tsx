@@ -222,14 +222,16 @@ export default function PresentationForm({ shouldGenerateAI = false, topic = nul
               const scrollParent = view?.scrollDOM;
               const viewportHeight = scrollParent?.clientHeight;
 
-              const targetY = coords.top - editorRect.top + scrollParent?.scrollTop;
-              const scrollTop = targetY - viewportHeight / 3;
+              if (editorRect && scrollParent && viewportHeight) {
+                const targetY = coords.top - editorRect.top + scrollParent.scrollTop;
+                const scrollTop = targetY - viewportHeight / 3;
 
-              // スムーズにスクロール
-              scrollParent?.scrollTo({
-                top: Math.max(0, scrollTop),
-                behavior: 'smooth'
-              });
+                // スムーズにスクロール
+                scrollParent.scrollTo({
+                  top: Math.max(0, scrollTop),
+                  behavior: 'smooth'
+                });
+              }
             }
           }
         } catch (error) {
