@@ -6,13 +6,17 @@ interface ElementPosition {
   text: string;
 }
 
-class PositionTrackingMarp extends Marp {
-  positions: ElementPosition[] = [];
+interface MarpRule {
+  (tokens: unknown[], idx: number): void;
+}
 
-  constructor(opts?: any) {
+class PositionTrackingMarp extends Marp {
+  private positions: ElementPosition[] = [];
+
+  constructor(opts?: Record<string, unknown>) {
     super(opts);
 
-    this.markdown.renderer.rules.paragraph_open = (tokens: any[], idx: number) => {
+    this.markdown.renderer.rules.paragraph_open = (tokens: unknown[], idx: number) => {
       const token = tokens[idx];
       const position = this.positions.length;
       
@@ -27,7 +31,7 @@ class PositionTrackingMarp extends Marp {
       return `<p data-position="${position}">`;
     };
 
-    this.markdown.renderer.rules.heading_open = (tokens: any[], idx: number) => {
+    this.markdown.renderer.rules.heading_open = (tokens: unknown[], idx: number) => {
       const token = tokens[idx];
       const position = this.positions.length;
       
@@ -43,7 +47,15 @@ class PositionTrackingMarp extends Marp {
     };
   }
 
-  render(markdown: string, env?: HTMLAsArray) {
+  addRule(ruleName: string, rule: MarpRule) {
+    return super.addRule(ruleName, rule);
+  }
+
+  addInlineRule(ruleName: string, rule: MarpRule) {
+    return super.addInlineRule(ruleName, rule);
+  }
+
+  render(markdown: string, env?: Record<string, unknown>) {
     this.positions = [];
     return super.render(markdown, env);
   }

@@ -187,7 +187,7 @@ export const ParticleBackground = () => {
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, []);
+  }, [animate]);
 
   return (
     <canvas

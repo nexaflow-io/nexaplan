@@ -7,9 +7,7 @@ import { useRouter } from 'next/navigation';
 import { ParticleBackground } from '@/components/background/ParticleBackground';
 
 export default function Home() {
-  const [inputFocused, setInputFocused] = useState(false);
   const [inputValue, setInputValue] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
   const router = useRouter();
 
   const handleAIGenerate = async () => {
@@ -58,8 +56,6 @@ export default function Home() {
                   onChange={(e) => setInputValue(e.target.value)}
                   className="w-full p-6 bg-gray-900/50 rounded-xl text-white resize-none h-48 border border-white/10 focus:border-purple-400/50 focus:ring-2 focus:ring-purple-400/20 focus:outline-none transition-all duration-300 backdrop-blur-sm"
                   placeholder="アイデアを入力してください..."
-                  onFocus={() => setInputFocused(true)}
-                  onBlur={() => setInputFocused(false)}
                 />
                 <motion.div
                   animate={{

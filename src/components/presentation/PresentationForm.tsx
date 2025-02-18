@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { generateSlides, generateAISlides } from '@/lib/marp-templates';
 import { useForm } from 'react-hook-form';
-import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import CodeMirror from '@uiw/react-codemirror';
@@ -83,66 +82,15 @@ style: |
 
 # `;
 
-const PresentationForm: React.FC<PresentationFormProps> = ({ 
-  shouldGenerateAI = false,
-  topic = null
-}) => {
+export default function PresentationForm({ shouldGenerateAI = false, topic = null }: PresentationFormProps) {
   const [markdown, setMarkdown] = useState(defaultContent);
   const [html, setHtml] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [inputFocused, setInputFocused] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState(0);
-  const [generatedMarkdown, setGeneratedMarkdown] = useState('');
-  const editorRef = useRef<HTMLTextAreaElement>(null);
-  const previewRef = useRef<HTMLDivElement>(null);
-  const prevScrollTopRef = useRef<number>(0);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const editorCodeMirrorRef = useRef<any>(null);
   const fullscreenRef = useRef<HTMLDivElement>(null);
   const [positions, setPositions] = useState<ElementPosition[]>([]);
   const [isPreviewHoverEnabled, setIsPreviewHoverEnabled] = useState(true);
-  const editorCodeMirrorRef = useRef<any>(null);
-
-  const { register, handleSubmit, watch } = useForm();
-  const inputValue = watch('projectName', '');
-
-  const onSubmit = async (data: any) => {
-    try {
-      setIsLoading(true);
-      const result = await generateSlides({ 
-        markdown: defaultContent + data.projectName
-      });
-      setMarkdown(defaultContent + data.projectName);
-      setHtml(result.html);
-      setIsEditing(true);
-    } catch (error) {
-      console.error('Error generating presentation:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const updatePreview = async () => {
-      try {
-        if (markdown) {
-          const { html, positions } = await generateSlides({ markdown });
-          setHtml(html);
-          setPositions(positions);
-        }
-      } catch (error) {
-        console.error('Error updating preview:', error);
-      }
-    };
-    updatePreview();
-  }, [markdown]);
-
-  useEffect(() => {
-    if (shouldGenerateAI && topic) {
-      handleAIGenerate(topic);
-    }
-  }, [shouldGenerateAI, topic]);
 
   const searchParams = useSearchParams();
 
@@ -176,7 +124,6 @@ const PresentationForm: React.FC<PresentationFormProps> = ({
           
           console.log('Generated result:', result)
           if (result && result.markdown && result.html) {
-            setGeneratedMarkdown(result.markdown)
             setGenerationStep(3)
             
             // 最終的な更新のための遅延
@@ -199,20 +146,8 @@ const PresentationForm: React.FC<PresentationFormProps> = ({
     }
   }, [searchParams])
 
-  const handleMarkdownChange = useCallback(async (content: string) => {
-    const newMarkdown = content;
-    setMarkdown(newMarkdown);
-    try {
-      const { html } = await generateSlides({ markdown: newMarkdown });
-      setHtml(html);
-    } catch (error) {
-      console.error('Error updating preview:', error);
-    }
-  }, []);
-
   const handleAIGenerate = async (topic: string) => {
     try {
-      setIsLoading(true);
       setIsGenerating(true);
       setGenerationStep(1)
       const response = await generateAISlides({
@@ -227,37 +162,32 @@ const PresentationForm: React.FC<PresentationFormProps> = ({
       }
     } catch (error) {
       console.error('Error generating slides:', error);
-      // エラー処理を追加する場合はここに
     } finally {
-      setIsLoading(false);
       setIsGenerating(false);
     }
   };
 
-  const handleNewPresentation = async () => {
+  const handleNewPresentation = useCallback(() => {
     setMarkdown(defaultContent);
     try {
       const result = await generateSlides({ markdown: defaultContent });
       setHtml(result.html);
-      setIsEditing(false);
     } catch (error) {
       console.error('Error creating new presentation:', error);
     }
-  };
+  }, []);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       fullscreenRef.current?.requestFullscreen();
-      setIsFullscreen(true);
     } else {
       document.exitFullscreen();
-      setIsFullscreen(false);
     }
   };
 
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
+      const isFullscreen = !!document.fullscreenElement;
     };
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -319,6 +249,18 @@ const PresentationForm: React.FC<PresentationFormProps> = ({
       return () => preview.removeEventListener('mouseover', handleElementHover);
     }
   }, [handleElementHover]);
+
+  const onSubmit = async (data: { idea: string }) => {
+    try {
+      const result = await generateSlides({ 
+        markdown: defaultContent + data.idea
+      });
+      setMarkdown(defaultContent + data.idea);
+      setHtml(result.html);
+    } catch (error) {
+      console.error('Error generating presentation:', error);
+    }
+  };
 
   return (
     <div className="h-screen flex flex-col bg-gray-900">
@@ -439,14 +381,9 @@ const PresentationForm: React.FC<PresentationFormProps> = ({
                             hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-purple-500/40"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    {isFullscreen ? (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                            d="M9 20v-6H4m16 6v-6h-5m5-8V6h-5M4 6v4h5" />
-                    ) : (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                            d="M4 8V4m0 0h4M4 4l5 5m11-5V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
-                    )}
-                  </svg>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M4 8V4m0 0h4M4 4l5 5m11-5V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+                    </svg>
                 </button>
               </div>
             </div>
@@ -474,5 +411,3 @@ const PresentationForm: React.FC<PresentationFormProps> = ({
     </div>
   );
 };
-
-export default PresentationForm;
