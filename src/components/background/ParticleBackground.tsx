@@ -29,7 +29,7 @@ const PARTICLE_LIFETIME = 400;
 export const ParticleBackground = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particles = useRef<Particle[]>([]);
-  const animationFrameId = useRef<number>();
+  const animationFrameId = useRef<number>(0);
   const isFirstRender = useRef(true);
   const time = useRef(0);
 
