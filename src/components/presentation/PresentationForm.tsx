@@ -11,12 +11,6 @@ interface PresentationFormProps {
   topic?: string | null;
 }
 
-interface ElementPosition {
-  start: number;
-  end: number;
-  text: string;
-}
-
 interface CodeMirrorRef {
   editor?: {
     focus: () => void;
