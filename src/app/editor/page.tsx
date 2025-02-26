@@ -8,11 +8,7 @@ import { useSearchParams } from 'next/navigation';
 const PresentationForm = dynamic(
   () => import('@/components/presentation/PresentationForm'),
   {
-    loading: () => (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-blue-600"></div>
-      </div>
-    ),
+    loading: () => null,
     ssr: false
   }
 );
@@ -29,11 +25,7 @@ function EditorContent() {
 export default function EditorPage() {
   return (
     <main className="h-screen w-screen bg-gradient-to-b from-gray-900 to-black text-white overflow-hidden">
-      <Suspense fallback={
-        <div className="flex items-center justify-center h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-blue-600"></div>
-        </div>
-      }>
+      <Suspense fallback={null}>
         <EditorContent />
       </Suspense>
     </main>

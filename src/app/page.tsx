@@ -226,21 +226,9 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.8 }}
-                className="mt-12 flex items-center gap-8"
+                className="mt-12"
               >
-                <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className={`w-10 h-10 rounded-full border-2 border-gray-900 bg-gradient-to-br ${
-                      i === 1 ? 'from-purple-400 to-purple-600' :
-                      i === 2 ? 'from-blue-400 to-blue-600' :
-                      i === 3 ? 'from-pink-400 to-pink-600' :
-                      'from-indigo-400 to-indigo-600'
-                    }`}></div>
-                  ))}
-                </div>
-                <div className="text-sm text-gray-300">
-                  <span className="text-white font-medium">1,000+</span> ユーザーが利用中
-                </div>
+                {/* ユーザー数表示を削除 */}
               </motion.div>
             </motion.div>
             
@@ -273,45 +261,185 @@ export default function LandingPage() {
                       transition={{ duration: 1, delay: 1 }}
                       className="w-full max-w-md"
                     >
-                      {/* スライドプレビュー */}
+                      {/* AIプロセスの可視化 */}
                       <div className="relative rounded-lg overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900 p-6 shadow-lg border border-white/5">
+                        {/* 進行状況バー */}
                         <motion.div
                           initial={{ width: "0%" }}
                           animate={{ width: "100%" }}
-                          transition={{ duration: 2, delay: 1.5 }}
+                          transition={{ duration: 3.5, delay: 1 }}
                           className="h-1 bg-gradient-to-r from-purple-500 to-blue-500 absolute top-0 left-0"
                         />
                         
                         <div className="text-center">
-                          <motion.h3 
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 1.7 }}
-                            className="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300"
-                          >
-                            AIが生成したスライド
-                          </motion.h3>
-                          
+                          {/* 入力テキスト表示 */}
                           <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.5, delay: 2 }}
-                            className="space-y-3"
+                            initial={{ opacity: 1, y: 0 }}
+                            animate={{ 
+                              opacity: [1, 1, 0],
+                              y: [0, 0, -20]
+                            }}
+                            transition={{ 
+                              duration: 2, 
+                              times: [0, 0.7, 1],
+                              delay: 1 
+                            }}
+                            className="absolute inset-x-0 p-2 sm:p-4"
                           >
-                            <div className="h-2 w-3/4 bg-white/20 rounded mx-auto"></div>
-                            <div className="h-2 w-full bg-white/20 rounded mx-auto"></div>
-                            <div className="h-2 w-5/6 bg-white/20 rounded mx-auto"></div>
+                            <div className="text-xs sm:text-sm text-purple-300 mb-1 sm:mb-2">入力テキスト:</div>
+                            <div className="text-white text-left p-1 sm:p-2 bg-gray-800/50 rounded border border-white/10 mb-1 sm:mb-2">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: "100%" }}
+                                transition={{ duration: 1.5, delay: 1.2 }}
+                                className="h-2 sm:h-4 bg-white/20 rounded"
+                              ></motion.div>
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: "80%" }}
+                                transition={{ duration: 1.2, delay: 1.5 }}
+                                className="h-2 sm:h-4 bg-white/20 rounded mt-1 sm:mt-2"
+                              ></motion.div>
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: "60%" }}
+                                transition={{ duration: 1, delay: 1.8 }}
+                                className="h-2 sm:h-4 bg-white/20 rounded mt-1 sm:mt-2"
+                              ></motion.div>
+                            </div>
+                            <div className="flex items-center justify-center gap-2 text-blue-300 text-xs sm:text-sm">
+                              <svg className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                              </svg>
+                              <span>AIが解析中...</span>
+                            </div>
                           </motion.div>
                           
+                          {/* AI処理中の表示 */}
                           <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.5, delay: 2.3 }}
-                            className="mt-6 flex justify-center gap-2"
+                            animate={{ 
+                              opacity: [0, 1, 0],
+                              scale: [0.9, 1, 1.1]
+                            }}
+                            transition={{ 
+                              duration: 1.5, 
+                              times: [0, 0.5, 1],
+                              delay: 2.5 
+                            }}
+                            className="absolute inset-0 flex items-center justify-center"
                           >
-                            <div className="w-2 h-2 rounded-full bg-white/50"></div>
-                            <div className="w-2 h-2 rounded-full bg-white/30"></div>
-                            <div className="w-2 h-2 rounded-full bg-white/30"></div>
+                            <div className="text-center">
+                              {/*レスポンシブ対応*/}
+                              <div className="inline-flex items-center justify-center w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-purple-500/20 mb-2 sm:mb-4">
+                                <svg className="w-5 h-5 sm:w-8 sm:h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                </svg>
+                              </div>
+                              <div className="text-purple-300 font-medium text-xs sm:text-sm">AIがスライドを生成中...</div>
+                            </div>
+                          </motion.div>
+                          
+                          {/* 生成されたスライド */}
+                          <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 3.5 }}
+                            className="relative pointer-events-none cursor-default"
+                          >
+                            {/* スライドのデザイン */}
+                            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg overflow-hidden shadow-lg border border-white/5 pointer-events-none cursor-default w-full">
+                              {/* スライドヘッダー - グラデーション */}
+                              <div className="h-1 sm:h-2 bg-gradient-to-r from-purple-500 to-blue-500"></div>
+                              
+                              {/* スライドコンテンツ */}
+                              <div className="p-3 sm:p-5">
+                                {/* スライドタイトル */}
+                                <motion.div
+                                  initial={{ opacity: 0, y: 5 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ duration: 0.5, delay: 3.7 }}
+                                  className="pointer-events-none cursor-default"
+                                >
+                                  <div className="text-sm sm:text-xl font-bold text-center mb-2 sm:mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300">
+                                    プレゼンテーション<br />タイトル
+                                  </div>
+                                </motion.div>
+                                
+                                {/* スライドの内容 */}
+                                <motion.div
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  transition={{ duration: 0.5, delay: 4 }}
+                                  className="space-y-2 sm:space-y-3 pointer-events-none cursor-default"
+                                >
+                                  {/* サブタイトル */}
+                                  <div className="text-xs sm:text-sm font-medium text-purple-300 mb-1 sm:mb-2 pointer-events-none cursor-default">主なポイント</div>
+                                  
+                                  {/* 箇条書き */}
+                                  <div className="flex items-start gap-1 sm:gap-2 pointer-events-none cursor-default">
+                                    <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-blue-400 mt-1 sm:mt-1.5"></div>
+                                    <div className="h-2 sm:h-3 flex-1 bg-white/20 rounded"></div>
+                                  </div>
+                                  <div className="flex items-start gap-1 sm:gap-2 pointer-events-none cursor-default">
+                                    <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-purple-400 mt-1 sm:mt-1.5"></div>
+                                    <div className="h-2 sm:h-3 w-11/12 bg-white/20 rounded"></div>
+                                  </div>
+                                  <div className="flex items-start gap-1 sm:gap-2 pointer-events-none cursor-default">
+                                    <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-pink-400 mt-1 sm:mt-1.5"></div>
+                                    <div className="h-2 sm:h-3 w-10/12 bg-white/20 rounded"></div>
+                                  </div>
+                                  
+                                  {/* グラフ風の要素 */}
+                                  <div className="mt-2 sm:mt-4 pt-2 sm:pt-4 border-t border-white/10 pointer-events-none cursor-default">
+                                    <div className="flex items-end h-10 sm:h-16 gap-1 justify-around mt-1 sm:mt-2">
+                                      <motion.div 
+                                        initial={{ height: 0 }}
+                                        animate={{ height: '40%' }}
+                                        transition={{ duration: 0.5, delay: 4.2 }}
+                                        className="w-6 sm:w-8 bg-purple-500/40 rounded-t cursor-default"
+                                      ></motion.div>
+                                      <motion.div 
+                                        initial={{ height: 0 }}
+                                        animate={{ height: '70%' }}
+                                        transition={{ duration: 0.5, delay: 4.3 }}
+                                        className="w-6 sm:w-8 bg-blue-500/40 rounded-t cursor-default"
+                                      ></motion.div>
+                                      <motion.div 
+                                        initial={{ height: 0 }}
+                                        animate={{ height: '50%' }}
+                                        transition={{ duration: 0.5, delay: 4.4 }}
+                                        className="w-6 sm:w-8 bg-pink-500/40 rounded-t cursor-default"
+                                      ></motion.div>
+                                      <motion.div 
+                                        initial={{ height: 0 }}
+                                        animate={{ height: '90%' }}
+                                        transition={{ duration: 0.5, delay: 4.5 }}
+                                        className="w-6 sm:w-8 bg-indigo-500/40 rounded-t cursor-default"
+                                      ></motion.div>
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              </div>
+                              
+                              {/* スライドフッター */}
+                              <div className="px-2 sm:px-5 py-1 sm:py-2 flex justify-between items-center text-[10px] sm:text-xs text-gray-400 border-t border-white/10 pointer-events-none cursor-default">
+                                <div>NexaPlan</div>
+                                <div>1 / 10</div>
+                              </div>
+                            </div>
+                            
+                            {/* スライドナビゲーション */}
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ duration: 0.5, delay: 4.3 }}
+                              className="mt-2 sm:mt-4 flex justify-center gap-1 sm:gap-2 pointer-events-none"
+                            >
+                              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white/50 cursor-default"></div>
+                              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white/30 cursor-default"></div>
+                              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white/30 cursor-default"></div>
+                            </motion.div>
                           </motion.div>
                         </div>
                       </div>
@@ -320,7 +448,7 @@ export default function LandingPage() {
                       <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ duration: 0.5, delay: 2.5 }}
+                        transition={{ duration: 0.5, delay: 4.5 }}
                         className="mt-4 text-center text-sm text-gray-400"
                       >
                         <div className="flex items-center justify-center gap-2">
