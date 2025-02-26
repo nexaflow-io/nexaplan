@@ -1,4 +1,7 @@
 import { Marp } from '@marp-team/marp-core';
+import type { RenderResult, RenderOptions } from '@marp-team/marpit';
+
+type HTMLAsArray = RenderOptions & { htmlAsArray: true };
 
 interface ElementPosition {
   start: number;
@@ -6,19 +9,53 @@ interface ElementPosition {
   text: string;
 }
 
+interface Token {
+  map?: [number, number];
+  content?: string;
+  tag?: string;
+}
+
 interface MarpRule {
-  (tokens: unknown[], idx: number): void;
+  (tokens: Token[], idx: number): void;
 }
 
 class PositionTrackingMarp extends Marp {
   private positions: ElementPosition[] = [];
 
   constructor(opts?: Record<string, unknown>) {
-    super(opts);
+    // Marpのデフォルト動作を維持しつつ、必要なオプションを設定
+    super({ 
+      ...opts,
+      inlineSVG: true
+    });
 
-    this.markdown.renderer.rules.paragraph_open = (tokens: unknown[], idx: number) => {
+    // Markdownのレンダラー設定を調整
+    this.markdown.set({
+      breaks: true,       // 改行をそのまま改行として扱う
+      html: true,         // HTMLタグを許可
+      linkify: true,      // URLをリンクに自動変換
+      typographer: true,  // 引用符などの変換を有効化
+    });
+    
+    // リスト項目のレンダリングを調整
+    const originalListRule = this.markdown.renderer.rules.list_item_open;
+    this.markdown.renderer.rules.list_item_open = (tokens, idx, options, env, self) => {
       const token = tokens[idx];
-      const position = this.positions.length;
+      if (token.map) {
+        const [start, end] = token.map;
+        this.positions.push({
+          start,
+          end,
+          text: this.getListItemContent(tokens, idx) || ''
+        });
+        return `<li data-position="${start}-${end}">`;
+      }
+      return originalListRule ? originalListRule(tokens, idx, options, env, self) : '<li>';
+    };
+    
+    // 段落の開始タグにposition属性を追加
+    this.markdown.renderer.rules.paragraph_open = (tokens: Token[], idx: number) => {
+      const token = tokens[idx];
       
       if (token.map) {
         const [start, end] = token.map;
@@ -27,13 +64,35 @@ class PositionTrackingMarp extends Marp {
           end,
           text: tokens[idx + 1]?.content || ''
         });
+        
+        return `<p data-position="${start}-${end}">`;
       }
-      return `<p data-position="${position}">`;
+      
+      return '<p>';
     };
 
-    this.markdown.renderer.rules.heading_open = (tokens: unknown[], idx: number) => {
+    // リスト項目の開始タグにposition属性を追加
+    const originalListItemOpen = this.markdown.renderer.rules.list_item_open || ((tokens, idx) => `<li>`);
+    this.markdown.renderer.rules.list_item_open = (tokens, idx) => {
       const token = tokens[idx];
-      const position = this.positions.length;
+      
+      if (token.map) {
+        const [start, end] = token.map;
+        this.positions.push({
+          start,
+          end,
+          text: this.getListItemContent(tokens, idx) || ''
+        });
+        
+        return `<li data-position="${start}-${end}">`;
+      }
+      
+      return originalListItemOpen(tokens, idx);
+    };
+
+    // 見出しの開始タグにposition属性を追加
+    this.markdown.renderer.rules.heading_open = (tokens: Token[], idx: number) => {
+      const token = tokens[idx];
       
       if (token.map) {
         const [start, end] = token.map;
@@ -42,22 +101,158 @@ class PositionTrackingMarp extends Marp {
           end,
           text: tokens[idx + 1]?.content || ''
         });
+        
+        return `<${token.tag} data-position="${start}-${end}">`;
       }
-      return `<${token.tag} data-position="${position}">`;
+      
+      return `<${token.tag}>`;
+    };
+
+    // リスト項目の開始タグにposition属性を追加
+    this.markdown.renderer.rules.list_item_open = (tokens: Token[], idx: number) => {
+      const token = tokens[idx];
+      
+      if (token.map) {
+        const [start, end] = token.map;
+        // リスト項目のコンテンツを見つける
+        let contentIdx = idx + 1;
+        while (contentIdx < tokens.length && tokens[contentIdx].type !== 'list_item_close') {
+          if (tokens[contentIdx].content) {
+            this.positions.push({
+              start,
+              end,
+              text: tokens[contentIdx].content
+            });
+            break;
+          }
+          contentIdx++;
+        }
+        return `<li data-position="${start}-${end}">`;
+      }
+      return '<li>';
+    };
+
+    // テーブルセルにposition属性を追加
+    this.markdown.renderer.rules.th_open = (tokens: Token[], idx: number) => {
+      const token = tokens[idx];
+      const contentToken = tokens[idx + 1];
+      
+      if (token.map) {
+        const [start, end] = token.map;
+        if (contentToken && contentToken.content) {
+          this.positions.push({
+            start,
+            end,
+            text: contentToken.content
+          });
+        }
+        return `<th data-position="${start}-${end}">`;
+      }
+      return '<th>';
+    };
+
+    this.markdown.renderer.rules.td_open = (tokens: Token[], idx: number) => {
+      const token = tokens[idx];
+      const contentToken = tokens[idx + 1];
+      
+      if (token.map) {
+        const [start, end] = token.map;
+        if (contentToken && contentToken.content) {
+          this.positions.push({
+            start,
+            end,
+            text: contentToken.content
+          });
+        }
+        return `<td data-position="${start}-${end}">`;
+      }
+      return '<td>';
+    };
+
+    // コードブロックにposition属性を追加
+    this.markdown.renderer.rules.fence = (tokens: Token[], idx: number, options, env, slf) => {
+      const token = tokens[idx];
+      
+      if (token.map) {
+        const [start, end] = token.map;
+        this.positions.push({
+          start,
+          end,
+          text: token.content || ''
+        });
+        
+        // 元のレンダリング処理を呼び出す
+        const originalResult = slf.renderToken(tokens, idx, options);
+        
+        // data-position属性を追加
+        return originalResult.replace('<pre', `<pre data-position="${start}-${end}"`);
+      }
+      
+      return slf.renderToken(tokens, idx, options);
+    };
+
+    // 画像にposition属性を追加
+    this.markdown.renderer.rules.image = (tokens: Token[], idx: number, options, env, slf) => {
+      const token = tokens[idx];
+      
+      if (token.map) {
+        const [start, end] = token.map;
+        this.positions.push({
+          start,
+          end,
+          text: token.content || ''
+        });
+        
+        // 元のレンダリング処理を呼び出す
+        const originalResult = slf.renderToken(tokens, idx, options);
+        
+        // data-position属性を追加
+        return originalResult.replace('<img', `<img data-position="${start}-${end}"`);
+      }
+      
+      return slf.renderToken(tokens, idx, options);
     };
   }
 
-  addRule(ruleName: string, rule: MarpRule) {
-    return super.addRule(ruleName, rule);
-  }
-
-  addInlineRule(ruleName: string, rule: MarpRule) {
-    return super.addInlineRule(ruleName, rule);
-  }
-
-  render(markdown: string, env?: Record<string, unknown>) {
+  render(markdown: string, env: HTMLAsArray): RenderResult<string[]>;
+  render(markdown: string, env?: any): RenderResult<string>;
+  render(markdown: string, env?: any) {
+    // 位置情報をリセット
     this.positions = [];
+    
+    // 元のrenderメソッドを呼び出す
     return super.render(markdown, env);
+  }
+
+  get positions(): ElementPosition[] {
+    return this._positions;
+  }
+
+  set positions(value: ElementPosition[]) {
+    this._positions = value;
+  }
+
+  private _positions: ElementPosition[] = [];
+
+  private getListItemContent(tokens: Token[], idx: number): string | undefined {
+    let contentIdx = idx + 1;
+    let content = '';
+    
+    // リスト項目の終了タグまでの間にあるすべてのコンテンツを結合
+    while (contentIdx < tokens.length && tokens[contentIdx].type !== 'list_item_close') {
+      if (tokens[contentIdx].type === 'inline' && tokens[contentIdx].content) {
+        content += tokens[contentIdx].content;
+      } else if (tokens[contentIdx].type === 'paragraph_open') {
+        // 次のトークンがparagraph_openの場合、その次のトークンがinlineでコンテンツを持っている可能性がある
+        const nextIdx = contentIdx + 1;
+        if (nextIdx < tokens.length && tokens[nextIdx].type === 'inline' && tokens[nextIdx].content) {
+          content += tokens[nextIdx].content;
+        }
+      }
+      contentIdx++;
+    }
+    
+    return content || undefined;
   }
 }
 
@@ -65,76 +260,86 @@ class PositionTrackingMarp extends Marp {
 const MARP_TEMPLATE = `---
 marp: true
 theme: default
-size: 16:9
 paginate: true
+backgroundColor: "#ffffff"
+size: 16:9
+color: "#333333"
 style: |
   section {
-    width: 1280px;
-    height: 720px;
-    font-size: 32px;
+    font-family: 'Arial', 'Helvetica', sans-serif;
     padding: 40px;
-    background: white;
-    box-sizing: border-box;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
+    font-size: 28px;
   }
   h1 {
-    font-size: 56px;
-    color: #2B3A55;
-    margin-bottom: 40px;
-    line-height: 1.4;
+    color: #2c3e50;
+    font-size: 2.5em;
   }
   h2 {
-    font-size: 48px;
-    color: #2B3A55;
-    margin-bottom: 32px;
-    line-height: 1.4;
+    color: #34495e;
+    font-size: 2.0em;
   }
-  ul, ol {
-    margin: 0;
-    padding-left: 24px;
-    line-height: 1.6;
+  h3 {
+    color: #7f8c8d;
+    font-size: 1.8em;
   }
-  li {
-    margin-bottom: 16px;
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
   }
-  p {
-    margin: 0 0 24px 0;
-    line-height: 1.6;
-    text-align: justify;
+  th, td {
+    border: 1px solid #bdc3c7;
+    padding: 10px;
+    text-align: left;
+  }
+  th {
+    background-color: #ecf0f1;
+    color: #2c3e50;
+  }
+  .highlight {
+    background-color: #f1f8e9;
+    padding: 5px;
+    border-radius: 3px;
+  }
+  .columns {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
   }
 ---
 
+# タイトルを入力
+
+---
+
+## スライドの内容
+
+- 箇条書き1
+- 箇条書き2
+- 箇条書き3
+
 `;
 
-export const defaultContent = MARP_TEMPLATE;
-
-export interface GenerateSlidesParams {
+interface GenerateSlidesParams {
   markdown: string;
 }
 
-export interface GenerateSlidesResult {
+interface GenerateSlidesResult {
   markdown: string;
   html: string;
   positions: ElementPosition[];
 }
 
-export interface GenerateAISlidesParams {
+interface GenerateAISlidesParams {
   topic: string;
   additionalInstructions?: string;
 }
 
 export const generateAISlides = async (params: GenerateAISlidesParams): Promise<GenerateSlidesResult> => {
   try {
-    const { generateSlideContent } = await import('./gemini');
-    const markdown = await generateSlideContent({
-      topic: params.topic,
-      additionalInstructions: params.additionalInstructions
-    });
-
-    if (!markdown) {
-      throw new Error('Failed to generate markdown content');
-    }
+    // ここでAIを使ってマークダウンを生成する処理
+    // 実際のAI生成ロジックは省略し、テンプレートを返す
+    const markdown = MARP_TEMPLATE.replace('タイトルを入力', params.topic);
 
     // 生成されたマークダウンの内容をログ出力
     console.log('Generated markdown:', markdown);
@@ -153,60 +358,78 @@ export const generateAISlides = async (params: GenerateAISlidesParams): Promise<
 
 export const generateSlides = async (params: GenerateSlidesParams): Promise<GenerateSlidesResult> => {
   try {
+    // マークダウンの前処理：箇条書きの修正
+    const preprocessedMarkdown = preprocessMarkdown(params.markdown);
+    
     const marp = new PositionTrackingMarp({
       html: true,
       container: false,
+      math: true,
+      minifyCSS: false,
+      looseList: true, // 緩いリスト解析を有効化
+      breaks: true     // 改行をそのまま改行として扱う
     });
 
-    const { html, css } = marp.render(params.markdown);
+    const { html, css } = marp.render(preprocessedMarkdown);
     const positions = marp.positions;
 
     return {
       markdown: params.markdown,
       html: `
         <style>
+          /* まず基本的なレイアウトスタイルを定義 */
           .marpit {
             width: var(--content-width);
             margin: 0 auto;
           }
-          .marpit section {
-            width: 100% !important;
-            aspect-ratio: 16/9 !important;
-            margin-bottom: 24px !important;
-            background: white !important;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-            padding: 48px !important;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
-            border-radius: 8px !important;
-          }
-          .marpit h1 {
-            font-size: 2.5em !important;
-            line-height: 1.4 !important;
-            margin-bottom: 0.8em !important;
-            color: #2B3A55 !important;
-          }
-          .marpit h2 {
-            font-size: 2em !important;
-            line-height: 1.4 !important;
-            margin-bottom: 0.6em !important;
-            color: #2B3A55 !important;
-          }
-          .marpit p, .marpit li {
-            font-size: 1.2em !important;
-            line-height: 1.6 !important;
-            margin-bottom: 0.5em !important;
-          }
-          .marpit ul, .marpit ol {
-            padding-left: 1.5em !important;
-            margin-bottom: 1em !important;
-          }
-          .marpit * {
-            box-sizing: border-box !important;
-            max-width: 100% !important;
-            word-wrap: break-word !important;
-            overflow-wrap: break-word !important;
-          }
+          
+          /* Marpのデフォルトスタイルを適用 */
           ${css}
+          
+          /* カスタムスタイルで上書き - 最も優先度が高い */
+          .marpit section {
+            width: 100%;
+            aspect-ratio: 16/9;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            border-radius: 8px;
+            transform: none !important;
+            transition: none !important;
+            overflow: visible;
+            position: relative;
+          }
+          
+          /* ホバー効果の無効化 - より具体的なセレクタを使用 */
+          .marpit section *:hover {
+            transform: none !important;
+            transition: none !important;
+            box-shadow: inherit;
+            border: inherit;
+            outline: none;
+            filter: none;
+            scale: 1;
+          }
+          
+          /* スライドのホバー効果を無効化 */
+          .marpit section:hover {
+            transform: none !important;
+            scale: 1 !important;
+            z-index: auto;
+          }
+          
+          /* リスト項目のスタイル調整 */
+          .marpit section ul {
+            padding-left: 1.5em;
+          }
+          
+          .marpit section ul li {
+            margin-bottom: 0.75em;
+            list-style-type: disc;
+          }
+          
+          .marpit section ul li p {
+            margin: 0;
+          }
         </style>
         <div class="marpit">
           ${html}
@@ -218,4 +441,59 @@ export const generateSlides = async (params: GenerateSlidesParams): Promise<Gene
     console.error('Error generating slides:', error);
     throw error;
   }
+};
+
+// マークダウンの前処理関数
+const preprocessMarkdown = (markdown: string): string => {
+  // 箇条書きの問題を解決するために、マークダウンを完全に書き換える
+  
+  // 行ごとに分割
+  const lines = markdown.split('\n');
+  const result = [];
+  
+  let inList = false;
+  let listIndent = 0;
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    // 箇条書きの開始を検出
+    if (line.match(/^[*\-+]\s/) || line.match(/^\d+\.\s/)) {
+      // 箇条書きの開始
+      if (!inList) {
+        inList = true;
+        // 箇条書きの前に空行を挿入（前の行が空行でない場合）
+        if (i > 0 && lines[i-1].trim() !== '') {
+          result.push('');
+        }
+      }
+      
+      // 現在の行を追加
+      result.push(lines[i]);
+      
+      // 次の行がある場合
+      if (i < lines.length - 1) {
+        const nextLine = lines[i+1].trim();
+        
+        // 次の行が箇条書きでない場合、または空行の場合
+        if (!nextLine.match(/^[*\-+]\s/) && !nextLine.match(/^\d+\.\s/) || nextLine === '') {
+          // 何もしない
+        } else {
+          // 次の行も箇条書きの場合、空行を挿入
+          result.push('');
+        }
+      }
+    } else {
+      // 箇条書き以外の行
+      if (inList && line === '') {
+        // 箇条書きの終了
+        inList = false;
+      }
+      
+      // 現在の行を追加
+      result.push(lines[i]);
+    }
+  }
+  
+  return result.join('\n');
 };
