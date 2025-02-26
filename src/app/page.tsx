@@ -156,7 +156,7 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="text-5xl md:text-7xl font-bold mb-6"
+                className="text-4xl sm:text-5xl md:text-7xl font-bold mb-4 sm:mb-6"
               >
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
                   NexaPlan
@@ -167,7 +167,7 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
-                className="text-xl md:text-2xl text-gray-300 mb-8 leading-relaxed"
+                className="text-base sm:text-xl md:text-2xl text-gray-300 mb-6 sm:mb-8 leading-relaxed"
               >
                 <span className="text-white font-semibold">アイデアを入力するだけで</span>、<wbr />
                 <span className="inline sm:hidden"><br /></span>
@@ -181,11 +181,11 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
-                className="flex flex-col sm:flex-row gap-4"
+                className="flex flex-col sm:flex-row gap-3 sm:gap-4"
               >
                 <Link 
                   href="/idea" 
-                  className="group relative px-8 py-4 overflow-hidden rounded-xl font-medium text-white hover:text-white transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none"
+                  className="group relative px-6 py-3 sm:px-8 sm:py-4 overflow-hidden rounded-xl font-medium text-white hover:text-white transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none"
                 >
                   {/* ボタンの背景グラデーション */}
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600"></div>
@@ -207,7 +207,7 @@ export default function LandingPage() {
                 
                 <button 
                   onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="group relative px-8 py-4 overflow-hidden rounded-xl font-medium text-white hover:text-white transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none"
+                  className="group relative px-6 py-3 sm:px-8 sm:py-4 overflow-hidden rounded-xl font-medium text-white hover:text-white transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none"
                 >
                   {/* ボタンの背景 */}
                   <div className="absolute inset-0 bg-white/5 backdrop-blur-sm border border-white/10"></div>
@@ -247,7 +247,7 @@ export default function LandingPage() {
                 <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-blue-500/10 backdrop-blur-sm"></div>
                 
                 {/* ウィンドウの内容 */}
-                <div className="p-4 h-full flex flex-col">
+                <div className="p-2 xs:p-3 sm:p-5 h-full flex flex-col">
                   {/* ウィンドウのヘッダー */}
                   <div className="flex items-center gap-2 mb-4">
                     <div className="w-3 h-3 rounded-full bg-red-500"></div>
@@ -301,13 +301,13 @@ export default function LandingPage() {
                                 initial={{ width: 0 }}
                                 animate={{ width: "80%" }}
                                 transition={{ duration: 1.2, delay: 1.5 }}
-                                className="h-2 sm:h-4 bg-white/20 rounded mt-1 sm:mt-2"
+                                className="h-2 sm:h-3 bg-white/20 rounded mt-1 sm:mt-2"
                               ></motion.div>
                               <motion.div
                                 initial={{ width: 0 }}
                                 animate={{ width: "60%" }}
                                 transition={{ duration: 1, delay: 1.8 }}
-                                className="h-2 sm:h-4 bg-white/20 rounded mt-1 sm:mt-2"
+                                className="h-2 sm:h-3 bg-white/20 rounded mt-1 sm:mt-2"
                               ></motion.div>
                             </div>
                             <div className="flex items-center justify-center gap-2 text-blue-300 text-xs sm:text-sm">
@@ -356,7 +356,7 @@ export default function LandingPage() {
                               <div className="h-1 sm:h-2 bg-gradient-to-r from-purple-500 to-blue-500"></div>
                               
                               {/* スライドコンテンツ */}
-                              <div className="p-3 sm:p-5">
+                              <div className="p-2 xs:p-3 sm:p-5">
                                 {/* スライドタイトル */}
                                 <motion.div
                                   initial={{ opacity: 0, y: 5 }}
@@ -364,7 +364,7 @@ export default function LandingPage() {
                                   transition={{ duration: 0.5, delay: 3.7 }}
                                   className="pointer-events-none cursor-default"
                                 >
-                                  <div className="text-sm sm:text-xl font-bold text-center mb-2 sm:mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300">
+                                  <div className="text-xs xs:text-sm sm:text-xl font-bold text-center mb-1 xs:mb-2 sm:mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300">
                                     <span className="inline-block">プレゼンテーション</span><br className="xs:hidden sm:hidden md:inline" />
                                     <span className="inline-block">タイトル</span>
                                   </div>
@@ -378,20 +378,20 @@ export default function LandingPage() {
                                   className="space-y-2 sm:space-y-3 pointer-events-none cursor-default"
                                 >
                                   {/* サブタイトル */}
-                                  <div className="text-xs sm:text-sm font-medium text-purple-300 mb-1 sm:mb-2 text-center sm:text-left">主なポイント</div>
+                                  <div className="text-[10px] xs:text-xs sm:text-sm font-medium text-purple-300 mb-0.5 xs:mb-1 sm:mb-2 text-center sm:text-left">主なポイント</div>
                                   
                                   {/* 箇条書き */}
-                                  <div className="flex items-start gap-1 sm:gap-2 pointer-events-none cursor-default">
-                                    <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-blue-400 mt-1 sm:mt-1.5"></div>
-                                    <div className="h-2 sm:h-3 flex-1 bg-white/20 rounded"></div>
+                                  <div className="flex items-start gap-1 xs:gap-1.5 sm:gap-2 pointer-events-none cursor-default">
+                                    <div className="w-0.5 h-0.5 xs:w-1 xs:h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-blue-400 mt-0.5 xs:mt-1 sm:mt-1.5"></div>
+                                    <div className="h-1.5 xs:h-2 sm:h-3 flex-1 bg-white/20 rounded"></div>
                                   </div>
-                                  <div className="flex items-start gap-1 sm:gap-2 pointer-events-none cursor-default">
-                                    <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-purple-400 mt-1 sm:mt-1.5"></div>
-                                    <div className="h-2 sm:h-3 w-11/12 bg-white/20 rounded"></div>
+                                  <div className="flex items-start gap-1 xs:gap-1.5 sm:gap-2 pointer-events-none cursor-default">
+                                    <div className="w-0.5 h-0.5 xs:w-1 xs:h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-purple-400 mt-0.5 xs:mt-1 sm:mt-1.5"></div>
+                                    <div className="h-1.5 xs:h-2 sm:h-3 w-11/12 bg-white/20 rounded"></div>
                                   </div>
-                                  <div className="flex items-start gap-1 sm:gap-2 pointer-events-none cursor-default">
-                                    <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-pink-400 mt-1 sm:mt-1.5"></div>
-                                    <div className="h-2 sm:h-3 w-10/12 bg-white/20 rounded"></div>
+                                  <div className="flex items-start gap-1 xs:gap-1.5 sm:gap-2 pointer-events-none cursor-default">
+                                    <div className="w-0.5 h-0.5 xs:w-1 xs:h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-pink-400 mt-0.5 xs:mt-1 sm:mt-1.5"></div>
+                                    <div className="h-1.5 xs:h-2 sm:h-3 w-10/12 bg-white/20 rounded"></div>
                                   </div>
                                   
                                   {/* グラフ風の要素 */}
@@ -438,7 +438,7 @@ export default function LandingPage() {
                               initial={{ opacity: 0, scale: 0.9 }}
                               animate={{ opacity: 1, scale: 1 }}
                               transition={{ duration: 0.5, delay: 4.3 }}
-                              className="mt-2 sm:mt-4 flex justify-center gap-1 sm:gap-2 pointer-events-none"
+                              className="mt-2 sm:mt-4 flex justify-center gap-1 xs:gap-1.5 sm:gap-2 pointer-events-none"
                             >
                               <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white/50 cursor-default"></div>
                               <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white/30 cursor-default"></div>
