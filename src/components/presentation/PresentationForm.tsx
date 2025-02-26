@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { generateSlides, generateAISlides } from '@/lib/marp-templates';
+import { generateSlides, generateAISlides, MarpTemplateType, getTemplateTypes, getTemplateByType } from '@/lib/marp-templates';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import CodeMirror from '@uiw/react-codemirror';
@@ -92,8 +92,10 @@ export default function PresentationForm({ shouldGenerateAI = false, topic = nul
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<MarpTemplateType>(MarpTemplateType.DEFAULT);
   const editorCodeMirrorRef = useRef<ReactCodeMirrorRef>(null);
   const fullscreenRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState<'editor' | 'preview'>('editor'); // タブの状態を管理
 
   const searchParams = useSearchParams();
 
@@ -146,7 +148,8 @@ export default function PresentationForm({ shouldGenerateAI = false, topic = nul
   }, [markdown]);
 
   useEffect(() => {
-    const idea = searchParams.get('idea')
+    const idea = searchParams?.get('idea')
+    
     if (idea) {
       setIsGenerating(true)
       setGenerationStep(1)
@@ -158,7 +161,8 @@ export default function PresentationForm({ shouldGenerateAI = false, topic = nul
           setGenerationStep(2)
           const result = await generateAISlides({
             topic: idea,
-            additionalInstructions: "プレゼンテーションスライドを生成してください。"
+            additionalInstructions: "プレゼンテーションスライドを生成してください。",
+            templateType: selectedTemplate
           })
           
           console.log('Generated result:', result)
@@ -184,7 +188,7 @@ export default function PresentationForm({ shouldGenerateAI = false, topic = nul
       setMarkdown('')
       setHtml('')
     }
-  }, [searchParams])
+  }, [searchParams, selectedTemplate])
 
   const handleAIGenerate = useCallback(async (topic: string) => {
     try {
@@ -192,7 +196,8 @@ export default function PresentationForm({ shouldGenerateAI = false, topic = nul
       setGenerationStep(1)
       const response = await generateAISlides({
         topic,
-        additionalInstructions: "プレゼンテーションスライドを生成してください。"
+        additionalInstructions: "プレゼンテーションスライドを生成してください。",
+        templateType: selectedTemplate
       });
       if (response.markdown) {
         setMarkdown(response.markdown);
@@ -206,7 +211,50 @@ export default function PresentationForm({ shouldGenerateAI = false, topic = nul
     } finally {
       setIsGenerating(false);
     }
-  }, []);
+  }, [selectedTemplate]);
+
+  // テンプレートを変更する関数
+  const handleTemplateChange = useCallback((templateType: MarpTemplateType) => {
+    console.log('テンプレート変更:', templateType);
+    setSelectedTemplate(templateType);
+    
+    // 現在のマークダウンからフロントマターとコンテンツを分離
+    const frontMatterRegex = /^---\s*\n([\s\S]*?)---\s*\n([\s\S]*)$/;
+    const match = markdown.match(frontMatterRegex);
+    
+    if (match) {
+      // フロントマターとコンテンツを分離
+      const currentFrontMatter = match[1];
+      const currentContent = match[2];
+      console.log('現在のフロントマター:', currentFrontMatter);
+      console.log('現在のコンテンツ:', currentContent.substring(0, 50) + '...');
+      
+      // 新しいテンプレートからフロントマターを取得
+      const newTemplate = getTemplateByType(templateType);
+      const newTemplateMatch = newTemplate.match(frontMatterRegex);
+      
+      if (newTemplateMatch) {
+        const newFrontMatter = newTemplateMatch[1];
+        console.log('新しいフロントマター:', newFrontMatter);
+        
+        // テーマ名を更新したフロントマターを作成
+        const updatedFrontMatter = newFrontMatter;
+        
+        // 新しいマークダウンを構築（更新されたフロントマター + 既存のコンテンツ）
+        const updatedMarkdown = `---\n${updatedFrontMatter}---\n${currentContent}`;
+        console.log('更新されたマークダウン:', updatedMarkdown.substring(0, 50) + '...');
+        setMarkdown(updatedMarkdown);
+      } else {
+        // フロントマターが見つからない場合は新しいテンプレートをそのまま使用
+        console.log('新しいテンプレートのフロントマターが見つかりません');
+        setMarkdown(newTemplate);
+      }
+    } else {
+      // フロントマターが見つからない場合は新しいテンプレートをそのまま使用
+      console.log('現在のマークダウンにフロントマターが見つかりません');
+      setMarkdown(getTemplateByType(templateType));
+    }
+  }, [markdown]);
 
   useEffect(() => {
     if (shouldGenerateAI && topic) {
@@ -340,96 +388,209 @@ export default function PresentationForm({ shouldGenerateAI = false, topic = nul
       </header>
 
       <div className="flex-1 p-4 min-h-0">
-        <div className="h-full flex gap-4">
-          <div className="w-1/2 rounded-2xl backdrop-blur-xl bg-gray-900/95 border border-white/10 shadow-2xl flex flex-col min-h-0">
+        <div className="h-full flex flex-col gap-4 md:flex-row">
+          <div className={`w-full md:w-1/2 rounded-2xl backdrop-blur-xl bg-gray-900/95 border border-white/10 shadow-2xl flex flex-col min-h-0 transition-all duration-300 ${activeTab === 'preview' ? 'md:flex hidden' : 'flex'}`}>
             <div className="h-16 flex items-center justify-between px-6 border-b border-white/10">
               <h2 className="text-base font-medium text-gray-300 flex items-center gap-3">
                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
-                Editor
+                {activeTab === 'editor' ? 'エディター' : 'プレビュー'}
               </h2>
+              <div className="flex items-center space-x-2">
+                {/* モバイル表示時のタブ切り替えボタン */}
+                <div className="md:hidden flex bg-gray-800/50 rounded-lg p-1">
+                  <button
+                    onClick={() => setActiveTab('editor')}
+                    className={`px-3 py-1.5 text-sm rounded-md transition-colors duration-200
+                              ${activeTab === 'editor' 
+                                ? 'bg-purple-600 text-white' 
+                                : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                  >
+                    エディター
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('preview')}
+                    className={`px-3 py-1.5 text-sm rounded-md transition-colors duration-200
+                              ${activeTab === 'preview' 
+                                ? 'bg-purple-600 text-white' 
+                                : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                  >
+                    プレビュー
+                  </button>
+                </div>
+                
+                {/* モバイル表示時のフルスクリーンボタン */}
+                {activeTab === 'preview' && (
+                  <button
+                    onClick={toggleFullscreen}
+                    className="md:hidden p-2.5 text-gray-400 hover:text-white transition-colors duration-200 rounded-lg
+                              hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-purple-500/40"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d="M4 8V4m0 0h4M4 4l5 5m11-5V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5V20m0 0h-4m4 0l-5-5" />
+                    </svg>
+                  </button>
+                )}
+              </div>
             </div>
             <div className="flex-1 min-h-0">
-              {isGenerating ? (
-                <div className="w-full h-full p-6 bg-transparent text-gray-200 font-mono text-sm leading-relaxed relative">
-                  <div className="absolute inset-6 backdrop-blur-sm bg-gray-900/50 rounded-xl flex items-center justify-center">
-                    <div className="flex flex-col items-center gap-4">
-                      <div className="relative">
-                        <div className="w-24 h-24">
-                          <div className="absolute w-full h-full rounded-full border-4 border-purple-500/30"></div>
-                          <div className="absolute w-full h-full rounded-full border-4 border-purple-500 border-t-transparent animate-[spin_1s_linear_infinite]"></div>
-                          <div className="absolute w-full h-full rounded-full border-4 border-purple-500/10 animate-[ping_1s_cubic-bezier(0,0,0.2,1)_infinite]"></div>
+              {activeTab === 'editor' ? (
+                isGenerating ? (
+                  <div className="w-full h-full p-6 bg-transparent text-gray-200 font-mono text-sm leading-relaxed relative">
+                    <div className="absolute inset-6 backdrop-blur-sm bg-gray-900/50 rounded-xl flex items-center justify-center">
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="relative">
+                          <div className="w-24 h-24">
+                            <div className="absolute w-full h-full rounded-full border-4 border-purple-500/30"></div>
+                            <div className="absolute w-full h-full rounded-full border-4 border-purple-500 border-t-transparent animate-[spin_1s_linear_infinite]"></div>
+                            <div className="absolute w-full h-full rounded-full border-4 border-purple-500/10 animate-[ping_1s_cubic-bezier(0,0,0.2,1)_infinite]"></div>
+                          </div>
                         </div>
-                      </div>
-                      <div className="text-center space-y-4">
-                        <div className="text-lg font-medium text-gray-200">スライドを生成中...</div>
-                        <div className="flex flex-col gap-2 text-sm">
-                          <div className={`flex items-center gap-2 ${generationStep >= 1 ? 'text-purple-400' : 'text-gray-500'}`}>
-                            <svg className={`w-5 h-5 ${generationStep >= 1 ? 'text-purple-400' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              {generationStep > 1 ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              ) : (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              )}
-                            </svg>
-                            アイデアを分析中...
-                          </div>
-                          <div className={`flex items-center gap-2 ${generationStep >= 2 ? 'text-purple-400' : 'text-gray-500'}`}>
-                            <svg className={`w-5 h-5 ${generationStep >= 2 ? 'text-purple-400' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              {generationStep > 2 ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              ) : (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              )}
-                            </svg>
-                            スライドを作成中...
-                          </div>
-                          <div className={`flex items-center gap-2 ${generationStep >= 3 ? 'text-purple-400' : 'text-gray-500'}`}>
-                            <svg className={`w-5 h-5 ${generationStep >= 3 ? 'text-purple-400' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              {generationStep >= 3 ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              ) : (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              )}
-                            </svg>
-                            最終調整中...
+                        <div className="text-center space-y-4">
+                          <div className="text-lg font-medium text-gray-200">スライドを生成中...</div>
+                          <div className="flex flex-col gap-2 text-sm">
+                            <div className={`flex items-center gap-2 ${generationStep >= 1 ? 'text-purple-400' : 'text-gray-500'}`}>
+                              <svg className={`w-5 h-5 ${generationStep >= 1 ? 'text-purple-400' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                {generationStep > 1 ? (
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                ) : (
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                )}
+                              </svg>
+                              アイデアを分析中...
+                            </div>
+                            <div className={`flex items-center gap-2 ${generationStep >= 2 ? 'text-purple-400' : 'text-gray-500'}`}>
+                              <svg className={`w-5 h-5 ${generationStep >= 2 ? 'text-purple-400' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                {generationStep > 2 ? (
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                ) : (
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                )}
+                              </svg>
+                              スライドを作成中...
+                            </div>
+                            <div className={`flex items-center gap-2 ${generationStep >= 3 ? 'text-purple-400' : 'text-gray-500'}`}>
+                              <svg className={`w-5 h-5 ${generationStep >= 3 ? 'text-purple-400' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                {generationStep >= 3 ? (
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                ) : (
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                )}
+                              </svg>
+                              最終調整中...
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <CodeMirror
+                    ref={editorCodeMirrorRef}
+                    value={markdown}
+                    height="100%"
+                    onChange={handleChange}
+                    style={{
+                      fontSize: '16px',
+                      color: 'rgb(229, 231, 235)',
+                    }}
+                    extensions={[
+                      // シンタックスハイライトを無効化
+                      // markdownLanguage({ codeLanguages: languages }),
+                    ]}
+                    className="h-full [&_.cm-editor]:!bg-transparent [&_.cm-content]:!bg-transparent [&_.cm-gutters]:!bg-transparent [&_.cm-scroller]:!bg-transparent [&_.cm-gutters]:!border-white/10 [&_.cm-gutters]:!text-gray-500 [&_.cm-selectionBackground]:!bg-white/10 [&_.cm-activeLine]:!bg-white/5 [&_.cm-cursor]:!border-l-2 [&_.cm-cursor]:!border-white/70"
+                  />
+                )
               ) : (
-                <CodeMirror
-                  ref={editorCodeMirrorRef}
-                  value={markdown}
-                  height="100%"
-                  onChange={handleChange}
+                <div 
+                  ref={fullscreenRef}
+                  className="flex-1 overflow-y-auto overflow-x-hidden relative"
                   style={{
-                    fontSize: '16px',
-                    color: 'rgb(229, 231, 235)',
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: '#4B5563 transparent'
                   }}
-                  extensions={[
-                    // シンタックスハイライトを無効化
-                    // markdownLanguage({ codeLanguages: languages }),
-                  ]}
-                  className="h-full [&_.cm-editor]:!bg-transparent [&_.cm-content]:!bg-transparent [&_.cm-gutters]:!bg-transparent [&_.cm-scroller]:!bg-transparent [&_.cm-gutters]:!border-white/10 [&_.cm-gutters]:!text-gray-500 [&_.cm-selectionBackground]:!bg-white/10 [&_.cm-activeLine]:!bg-white/5 [&_.cm-cursor]:!border-l-2 [&_.cm-cursor]:!border-white/70"
-                />
+                >
+                  <div 
+                    className="w-full h-full p-6"
+                    style={{
+                      ['--slide-width' as string]: '100%',
+                      ['--slide-height' as string]: 'auto',
+                      ['--content-width' as string]: 'min(calc(100% - 48px), 1200px)',
+                    }}
+                  >
+                    <div 
+                      className="preview-container"
+                      style={{
+                        width: '100%',
+                        height: 'auto',
+                        overflowY: 'visible',
+                        position: 'relative',
+                        display: 'block',
+                      }}
+                      dangerouslySetInnerHTML={{ __html: html }} 
+                    />
+                    {error && (
+                      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mt-4">
+                        <p className="font-medium">エラーが発生しました</p>
+                        <p className="text-sm">{error}</p>
+                        <div className="mt-2">
+                          <p className="font-medium text-sm">箇条書きの書き方に関する注意点：</p>
+                          <p className="text-sm">箇条書きの各項目の間には空行が必要です。以下のように記述してください：</p>
+                          <pre className="bg-white p-2 rounded mt-1 text-gray-700 text-xs">
+{`* 項目1
+
+* 項目2
+
+* 項目3`}
+                          </pre>
+                          <p className="text-sm mt-2">
+                            ※ エディタでは自動的に修正を試みていますが、複雑な構造の場合は手動で修正が必要な場合があります。
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
           </div>
 
-          <div className="w-1/2 rounded-2xl backdrop-blur-xl bg-gray-900/95 border border-white/10 shadow-2xl flex flex-col min-h-0">
+          {/* デスクトップ表示時のプレビュー部分 */}
+          <div className={`w-full md:w-1/2 rounded-2xl backdrop-blur-xl bg-gray-900/95 border border-white/10 shadow-2xl flex-col min-h-0 transition-all duration-300 ${activeTab === 'preview' ? 'flex' : 'md:flex hidden'}`}>
             <div className="h-16 flex items-center justify-between px-6 border-b border-white/10">
               <h2 className="text-base font-medium text-gray-300 flex items-center gap-3">
                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                Preview
+                プレビュー
               </h2>
               <div className="flex items-center space-x-4">
+                {/* モバイル表示時のタブ切り替えボタン */}
+                <div className="md:hidden flex bg-gray-800/50 rounded-lg p-1">
+                  <button
+                    onClick={() => setActiveTab('editor')}
+                    className={`px-3 py-1.5 text-sm rounded-md transition-colors duration-200
+                              ${activeTab === 'editor' 
+                                ? 'bg-purple-600 text-white' 
+                                : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                  >
+                    エディター
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('preview')}
+                    className={`px-3 py-1.5 text-sm rounded-md transition-colors duration-200
+                              ${activeTab === 'preview' 
+                                ? 'bg-purple-600 text-white' 
+                                : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                  >
+                    プレビュー
+                  </button>
+                </div>
+                
+                {/* フルスクリーンボタン */}
                 <button
                   onClick={toggleFullscreen}
                   className="p-2.5 text-gray-400 hover:text-white transition-colors duration-200 rounded-lg
@@ -437,8 +598,8 @@ export default function PresentationForm({ shouldGenerateAI = false, topic = nul
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                          d="M4 8V4m0 0h4M4 4l5 5m11-5V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
-                    </svg>
+                          d="M4 8V4m0 0h4M4 4l5 5m11-5V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5V20m0 0h-4m4 0l-5-5" />
+                  </svg>
                 </button>
               </div>
             </div>
@@ -462,7 +623,10 @@ export default function PresentationForm({ shouldGenerateAI = false, topic = nul
                   className="preview-container"
                   style={{
                     width: '100%',
-                    height: '100%',
+                    height: 'auto',
+                    overflowY: 'visible',
+                    position: 'relative',
+                    display: 'block',
                   }}
                   dangerouslySetInnerHTML={{ __html: html }} 
                 />

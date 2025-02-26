@@ -222,69 +222,231 @@ class PositionTrackingMarp extends Marp {
   }
 }
 
+// カスタムテーマの定義
+export const CUSTOM_THEME = `/* @theme custom */
+@import "default";
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap");
+
+section {
+  color: #656d76;
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 20px;
+  line-height: 1.7;
+  padding-bottom: 1em;
+}
+
+section.title {
+  background-color: #5e80ad;
+  color: white;
+}
+
+section.title h1,
+section.title h3,
+section.title h6 {
+  color: white;
+}
+
+section.title footer {
+  color: #5e80ad;
+}
+
+section.title strong {
+  color: white;
+}
+  
+strong {
+  color: #4488cc;
+}
+
+em {
+  font-style: normal;
+  font-weight: bold;
+  background-color: #4488cc25;
+}
+
+h1,
+h2 {
+  color: #224466;
+}
+
+section mjx-container {
+  color: #5e80ad;
+}
+
+section table {
+  margin: 10px auto;
+}
+
+section table td {
+  text-align: center;
+}
+
+section table td img {
+  display: block;
+  margin: 0 auto;
+}
+
+section table th {
+  background-color: var(--background-theme);
+}
+
+header {
+  width: 100%;
+  padding: 10px;
+  font-size: 1.5em;
+  font-weight: bold;
+  border-bottom: 2px solid #5e80ad; /* 下線を追加 */
+}`;
+
 // Marpスライドのテンプレート
-const MARP_TEMPLATE = `---
+const MARP_TEMPLATE_DEFAULT = `---
 marp: true
-theme: default
+theme: custom
 paginate: true
-backgroundColor: "#ffffff"
-size: 16:9
-color: "#333333"
-style: |
-  section {
-    font-family: 'Arial', 'Helvetica', sans-serif;
-    padding: 40px;
-    font-size: 28px;
-  }
-  h1 {
-    color: #2c3e50;
-    font-size: 2.5em;
-  }
-  h2 {
-    color: #34495e;
-    font-size: 2.0em;
-  }
-  h3 {
-    color: #7f8c8d;
-    font-size: 1.8em;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-  }
-  th, td {
-    border: 1px solid #bdc3c7;
-    padding: 10px;
-    text-align: left;
-  }
-  th {
-    background-color: #ecf0f1;
-    color: #2c3e50;
-  }
-  .highlight {
-    background-color: #f1f8e9;
-    padding: 5px;
-    border-radius: 3px;
-  }
-  .columns {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-  }
 ---
 
-# タイトルを入力
+<!-- _class: title -->
+
+# プロフェッショナルなプレゼンテーション
+
+あなたの名前 | 2025年2月26日
 
 ---
 
-## スライドの内容
+## アジェンダ
 
-- 箇条書き1
-- 箇条書き2
-- 箇条書き3
+<div class="box">
+このプレゼンテーションでは、以下のトピックについて説明します：
+</div>
 
+1. 主要なポイント
+2. データ分析結果
+3. 今後の展望と提案
+
+---
+
+## 主要なポイント
+
+<div class="columns">
+<div>
+
+### 重要な発見
+
+- 市場シェアが<strong>25%</strong>増加
+- 顧客満足度が向上
+- 新規ユーザー獲得コストが減少
+
+</div>
+<div>
+
+### 課題
+
+<div class="note">
+解決すべき課題がいくつか残っています
+</div>
+
+- 競合他社の新製品
+- 技術的な負債
+- 人材確保の難しさ
+
+</div>
+</div>
+
+---
+
+## データ分析結果
+
+| 指標 | Q1 | Q2 | Q3 | Q4 |
+|------|-----|-----|-----|-----|
+| 売上 | 120 | 150 | 180 | 210 |
+| コスト | 80 | 90 | 100 | 110 |
+| 利益 | 40 | 60 | 80 | 100 |
+
+<p class="caption">2024年度四半期データ（単位：百万円）</p>
+
+---
+
+## コード例
+
+\`\`\`javascript
+// 効率的なデータ処理関数
+function processData(data) {
+  return data
+    .filter(item => item.value > 0)
+    .map(item => ({
+      ...item,
+      processed: true,
+      score: calculateScore(item)
+    }))
+    .sort((a, b) => b.score - a.score);
+}
+\`\`\`
+
+---
+
+## 今後の展望
+
+<div class="highlight">
+2025年度は新たな成長機会に焦点を当てます
+</div>
+
+- 新市場への参入
+- 製品ラインの拡大
+- 顧客体験の向上
+
+<div class="warning">
+競合他社の動向に注意が必要です
+</div>
+
+---
+
+## 提案
+
+1. <strong>戦略的投資</strong>：研究開発予算を20%増加
+2. <strong>人材育成</strong>：専門スキル向上のためのトレーニングプログラム
+3. <strong>プロセス改善</strong>：効率化によるコスト削減
+
+<div class="success">
+これらの施策により、来年度は30%の成長が見込まれます
+</div>
+
+---
+
+<!-- _class: title -->
+
+# ご清聴ありがとうございました
+
+質問やフィードバックをお待ちしています
+
+<div class="footer">
+連絡先: email@example.com | 会社名
+</div>
 `;
+
+// グラデーションテンプレート（使用しないが、互換性のために残す）
+export const MARP_TEMPLATE_GRADIENT = MARP_TEMPLATE_DEFAULT;
+
+// ミニマルテンプレート（使用しないが、互換性のために残す）
+export const MARP_TEMPLATE_MINIMAL = MARP_TEMPLATE_DEFAULT;
+
+// ダークテンプレート（使用しないが、互換性のために残す）
+export const MARP_TEMPLATE_DARK = MARP_TEMPLATE_DEFAULT;
+
+// テンプレートの種類を定義
+export enum MarpTemplateType {
+  DEFAULT = 'default',
+  GRADIENT = 'gradient',
+  MINIMAL = 'minimal',
+  DARK = 'dark',
+}
+
+// テンプレートのマッピング
+const MARP_TEMPLATES: Record<MarpTemplateType, string> = {
+  [MarpTemplateType.DEFAULT]: MARP_TEMPLATE_DEFAULT,
+  [MarpTemplateType.GRADIENT]: MARP_TEMPLATE_GRADIENT,
+  [MarpTemplateType.MINIMAL]: MARP_TEMPLATE_MINIMAL,
+  [MarpTemplateType.DARK]: MARP_TEMPLATE_DARK,
+};
 
 interface GenerateSlidesParams {
   markdown: string;
@@ -299,27 +461,39 @@ interface GenerateSlidesResult {
 interface GenerateAISlidesParams {
   topic: string;
   additionalInstructions?: string;
+  templateType?: MarpTemplateType;
 }
 
+export const getCustomTheme = (): string => {
+  return CUSTOM_THEME;
+};
+
+export const getTemplateTypes = (): MarpTemplateType[] => {
+  return Object.values(MarpTemplateType);
+};
+
+export const getTemplateByType = (type: MarpTemplateType = MarpTemplateType.DEFAULT): string => {
+  return MARP_TEMPLATES[type] || MARP_TEMPLATES[MarpTemplateType.DEFAULT];
+};
+
 export const generateAISlides = async (params: GenerateAISlidesParams): Promise<GenerateSlidesResult> => {
-  try {
-    // ここでAIを使ってマークダウンを生成する処理
-    // 実際のAI生成ロジックは省略し、テンプレートを返す
-    const markdown = MARP_TEMPLATE.replace('タイトルを入力', params.topic);
-
-    // 生成されたマークダウンの内容をログ出力
-    console.log('Generated markdown:', markdown);
-
-    const result = await generateSlides({ markdown });
+  const { topic, additionalInstructions, templateType = MarpTemplateType.DEFAULT } = params;
+  
+  // AIに指示を送信
+  const prompt = `
+    Marpでプレゼンテーションスライドを作成してください。トピックは「${topic}」です。
+    ${additionalInstructions ? `追加の指示: ${additionalInstructions}` : ''}
     
-    // 生成結果をログ出力
-    console.log('Generated slides result:', result);
-
-    return result;
-  } catch (error) {
-    console.error('Error in generateAISlides:', error);
-    throw error;
-  }
+    以下のテンプレートを基にして、内容を置き換えてください。テンプレートのフォーマットとスタイル指定は維持してください。
+    
+    ${getTemplateByType(templateType)}
+  `;
+  
+  // AIからの応答を取得（実際の実装はここで行う）
+  // ここではダミーとして元のテンプレートを返す
+  const markdown = getTemplateByType(templateType);
+  
+  return generateSlides({ markdown });
 };
 
 export const generateSlides = async (params: GenerateSlidesParams): Promise<GenerateSlidesResult> => {
@@ -336,8 +510,73 @@ export const generateSlides = async (params: GenerateSlidesParams): Promise<Gene
       breaks: true     // 改行をそのまま改行として扱う
     });
 
+    // カスタムテーマを登録
+    marp.themeSet.add(CUSTOM_THEME);
+
     const { html, css } = marp.render(preprocessedMarkdown);
     const positions = marp.positions;
+
+    // スタイリッシュなスライドのための追加CSS
+    const enhancedCSS = `
+      /* スタイリッシュなスライドのための追加スタイル */
+      .marpit {
+        font-family: 'Inter', 'Noto Sans JP', sans-serif;
+      }
+      
+      .marpit section {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      
+      /* コードブロックのスタイル強化 */
+      .marpit section pre {
+        background-color: #282c34;
+        border-radius: 8px;
+        padding: 1em;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      
+      .marpit section pre code {
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        font-size: 0.9em;
+      }
+      
+      /* 表のスタイル強化 */
+      .marpit section table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 1em 0;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+      }
+      
+      .marpit section th {
+        background-color: #4f46e5;
+        color: white;
+        font-weight: 600;
+        text-align: left;
+        padding: 0.8em 1em;
+      }
+      
+      .marpit section td {
+        padding: 0.8em 1em;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      }
+      
+      .marpit section tr:nth-child(even) {
+        background-color: rgba(0, 0, 0, 0.02);
+      }
+      
+      /* 画像のスタイル強化 */
+      .marpit section img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+    `;
 
     return {
       markdown: params.markdown,
@@ -347,22 +586,33 @@ export const generateSlides = async (params: GenerateSlidesParams): Promise<Gene
           .marpit {
             width: var(--content-width);
             margin: 0 auto;
+            display: block; /* ブロック表示に設定 */
+            position: relative; /* 相対位置に設定 */
+            height: auto; /* 自動高さに設定 */
+            overflow: visible; /* オーバーフローを visible に設定 */
           }
           
           /* Marpのデフォルトスタイルを適用 */
           ${css}
+          ${CUSTOM_THEME}
+          
+          /* スタイリッシュなスライドのための追加スタイル */
+          ${enhancedCSS}
           
           /* カスタムスタイルで上書き - 最も優先度が高い */
           .marpit section {
             width: 100%;
-            aspect-ratio: 16/9;
-            margin-bottom: 24px;
+            height: auto !important; /* 固定アスペクト比ではなく自動高さに変更 */
+            min-height: 400px; /* 最小高さを設定 */
+            margin-bottom: 60px !important; /* スライド間のマージンをさらに増やす */
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             border-radius: 8px;
             transform: none !important;
             transition: none !important;
-            overflow: visible;
+            overflow: visible; /* オーバーフローを visible に設定 */
             position: relative;
+            padding: 2.5rem !important;
+            display: block; /* ブロック表示に設定 */
           }
           
           /* ホバー効果の無効化 - より具体的なセレクタを使用 */
@@ -385,16 +635,24 @@ export const generateSlides = async (params: GenerateSlidesParams): Promise<Gene
           
           /* リスト項目のスタイル調整 */
           .marpit section ul {
-            padding-left: 1.5em;
+            padding-left: 2em;
+            list-style-position: outside;
           }
           
           .marpit section ul li {
             margin-bottom: 0.75em;
-            list-style-type: disc;
+            list-style-type: disc !important;
+            display: list-item !important;
           }
           
           .marpit section ul li p {
             margin: 0;
+            display: inline;
+          }
+          
+          /* 最後のスライドの後に余白を追加 */
+          .marpit section:last-of-type {
+            margin-bottom: 100px !important;
           }
         </style>
         <div class="marpit">

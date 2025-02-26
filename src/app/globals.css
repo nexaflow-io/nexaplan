@@ -64,23 +64,30 @@ body {
 
 /* Marpスライドのスタイル */
 .marpit {
-  font-family: 'Arial', 'Helvetica', sans-serif;
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 14px;
 }
 
 /* スライド間の余白 */
 .marpit section {
-  margin-bottom: 1.5rem !important;
+  margin-bottom: 2.5rem !important;
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   border: 1px solid rgb(255 255 255 / 0.1);
   border-radius: 0.5rem;
-  padding: 2rem !important;
+  padding: 2.5rem !important;
   background-color: rgb(255 255 255 / 0.97);
-  transform: scale(0.9);
-  transform-origin: top center;
+  max-width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+  aspect-ratio: 16 / 9 !important;
+  width: 100%;
+  height: auto;
+  color: #656d76;
+  line-height: 1.7;
 }
 
 .marpit section:last-child {
-  margin-bottom: 1.5rem !important;
+  margin-bottom: 2.5rem !important;
 }
 
 /* スライドの内部余白 */
@@ -103,51 +110,90 @@ body {
 }
 
 .marpit h1 {
-  font-size: 2rem;
+  font-size: 1.75rem;
   margin-bottom: 1rem;
   border-bottom: 2px solid #e5e7eb;
   padding-bottom: 0.5rem;
+  color: #224466;
+  text-align: left;
 }
 
 .marpit h2 {
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   margin-bottom: 0.75rem;
-  color: #1f2937;
+  color: #224466;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.3rem;
+  text-align: left;
 }
 
 .marpit h3 {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   margin-bottom: 0.5rem;
   color: #374151;
+  font-weight: 600;
 }
 
 .marpit p {
-  margin-bottom: 1rem;
-  line-height: 1.6;
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+  font-size: 0.95rem;
 }
 
 .marpit ul, .marpit ol {
-  margin-bottom: 1rem;
-  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+  padding-left: 2rem;
+  list-style-position: outside;
+  font-size: 0.95rem;
 }
 
 .marpit li {
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.4rem;
+  display: list-item;
+  list-style-type: disc;
+}
+
+.marpit li p {
+  margin: 0;
+  display: inline;
 }
 
 .marpit table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  border: 1px solid #e5e7eb;
 }
 
 .marpit th, .marpit td {
   border: 1px solid #e5e7eb;
   padding: 0.5rem;
+  vertical-align: top;
+  text-align: left;
 }
 
 .marpit th {
   background-color: #f9fafb;
+  font-weight: 600;
+}
+
+.marpit tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.marpit tr:hover {
+  background-color: #f3f4f6;
+}
+
+.marpit strong {
+  color: #4488cc;
+}
+
+.marpit em {
+  font-style: normal;
+  font-weight: bold;
+  background-color: #4488cc25;
 }
 
 @layer utilities {
