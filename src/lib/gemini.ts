@@ -9,6 +9,61 @@ export const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 // Marpスライドのテンプレート
 const MARP_TEMPLATE = `---
 marp: true
+theme: default
+paginate: true
+backgroundColor: "#ffffff"
+size: 16:9
+color: "#333333"
+style: |
+  section {
+    font-family: 'Arial', 'Helvetica', sans-serif;
+    padding: 80px 50px 20px;
+    font-size: 16px;
+  }
+  h1 {
+    color: #2c3e50;
+    font-size: 2.5em;
+    border-bottom: 2px solid #2c3e50;
+    padding-bottom: 10px;
+  }
+  h2 {
+    color: #34495e;
+    font-size: 2.0em;
+    position: absolute;
+    top: 20px;
+    left: 50px;
+    right: 50px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #34495e;
+  }
+  h3 {
+    color: #7f8c8d;
+    font-size: 1.8em;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  th, td {
+    border: 1px solid #bdc3c7;
+    padding: 10px;
+    text-align: left;
+  }
+  th {
+    background-color: #ecf0f1;
+    color: #2c3e50;
+  }
+  .highlight {
+    background-color: #f1f8e9;
+    padding: 5px;
+    border-radius: 3px;
+  }
+  .columns {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
 ---
 
 `;
