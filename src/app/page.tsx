@@ -167,7 +167,7 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
-                className="text-base sm:text-xl md:text-2xl text-gray-300 mb-6 sm:mb-8 leading-relaxed"
+                className="text-base sm:text-xl md:text-2xl text-gray-300 mb-6 sm:mb-8 leading-relaxed max-w-[90%] sm:max-w-full mx-auto"
               >
                 <span className="text-white font-semibold">アイデアを入力するだけで</span>、<wbr />
                 <span className="inline sm:hidden"><br /></span>
@@ -181,7 +181,7 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
-                className="flex flex-col sm:flex-row gap-3 sm:gap-4"
+                className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-[90%] sm:max-w-full mx-auto"
               >
                 <Link 
                   href="/idea" 
@@ -242,7 +242,7 @@ export default function LandingPage() {
               className="md:w-1/2 relative"
             >
               {/* プレビューウィンドウ */}
-              <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-white/10 shadow-2xl">
+              <div className="relative w-full max-w-[90%] sm:max-w-[85%] md:max-w-full mx-auto aspect-video rounded-xl overflow-hidden border border-white/10 shadow-2xl">
                 {/* ウィンドウの背景 */}
                 <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-blue-500/10 backdrop-blur-sm"></div>
                 
@@ -351,7 +351,7 @@ export default function LandingPage() {
                             className="relative pointer-events-none cursor-default"
                           >
                             {/* スライドのデザイン */}
-                            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg overflow-hidden shadow-lg border border-white/5 pointer-events-none cursor-default w-full">
+                            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg overflow-hidden shadow-lg border border-white/5 pointer-events-none cursor-default w-full max-w-[95%] mx-auto">
                               {/* スライドヘッダー - グラデーション */}
                               <div className="h-1 sm:h-2 bg-gradient-to-r from-purple-500 to-blue-500"></div>
                               
