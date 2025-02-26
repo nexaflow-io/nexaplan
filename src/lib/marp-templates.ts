@@ -1,7 +1,8 @@
 import { Marp } from '@marp-team/marp-core';
-import type { RenderResult, RenderOptions } from '@marp-team/marpit';
+import type { RenderResult } from '@marp-team/marpit';
 
-type HTMLAsArray = RenderOptions & { htmlAsArray: true };
+// HTMLAsArrayの型定義を修正
+type HTMLAsArray = { htmlAsArray: true };
 
 interface ElementPosition {
   start: number;
@@ -13,6 +14,7 @@ interface Token {
   map?: [number, number];
   content?: string;
   tag?: string;
+  type?: string;
 }
 
 interface MarpRule {
@@ -20,7 +22,7 @@ interface MarpRule {
 }
 
 class PositionTrackingMarp extends Marp {
-  private positions: ElementPosition[] = [];
+  private _positions: ElementPosition[] = [];
 
   constructor(opts?: Record<string, unknown>) {
     // Marpのデフォルト動作を維持しつつ、必要なオプションを設定
@@ -36,22 +38,6 @@ class PositionTrackingMarp extends Marp {
       linkify: true,      // URLをリンクに自動変換
       typographer: true,  // 引用符などの変換を有効化
     });
-    
-    // リスト項目のレンダリングを調整
-    const originalListRule = this.markdown.renderer.rules.list_item_open;
-    this.markdown.renderer.rules.list_item_open = (tokens, idx, options, env, self) => {
-      const token = tokens[idx];
-      if (token.map) {
-        const [start, end] = token.map;
-        this.positions.push({
-          start,
-          end,
-          text: this.getListItemContent(tokens, idx) || ''
-        });
-        return `<li data-position="${start}-${end}">`;
-      }
-      return originalListRule ? originalListRule(tokens, idx, options, env, self) : '<li>';
-    };
     
     // 段落の開始タグにposition属性を追加
     this.markdown.renderer.rules.paragraph_open = (tokens: Token[], idx: number) => {
@@ -72,17 +58,25 @@ class PositionTrackingMarp extends Marp {
     };
 
     // リスト項目の開始タグにposition属性を追加
-    const originalListItemOpen = this.markdown.renderer.rules.list_item_open || ((tokens, idx) => `<li>`);
-    this.markdown.renderer.rules.list_item_open = (tokens, idx) => {
+    const originalListItemOpen = this.markdown.renderer.rules.list_item_open || ((tokens: Token[], idx: number) => `<li>`);
+    this.markdown.renderer.rules.list_item_open = (tokens: Token[], idx: number): string => {
       const token = tokens[idx];
       
       if (token.map) {
         const [start, end] = token.map;
-        this.positions.push({
-          start,
-          end,
-          text: this.getListItemContent(tokens, idx) || ''
-        });
+        // リスト項目のコンテンツを見つける
+        let contentIdx = idx + 1;
+        while (contentIdx < tokens.length && tokens[contentIdx].type !== 'list_item_close') {
+          if (tokens[contentIdx].content !== undefined) {
+            this.positions.push({
+              start,
+              end,
+              text: tokens[contentIdx].content || ''
+            });
+            break;
+          }
+          contentIdx++;
+        }
         
         return `<li data-position="${start}-${end}">`;
       }
@@ -108,30 +102,6 @@ class PositionTrackingMarp extends Marp {
       return `<${token.tag}>`;
     };
 
-    // リスト項目の開始タグにposition属性を追加
-    this.markdown.renderer.rules.list_item_open = (tokens: Token[], idx: number) => {
-      const token = tokens[idx];
-      
-      if (token.map) {
-        const [start, end] = token.map;
-        // リスト項目のコンテンツを見つける
-        let contentIdx = idx + 1;
-        while (contentIdx < tokens.length && tokens[contentIdx].type !== 'list_item_close') {
-          if (tokens[contentIdx].content) {
-            this.positions.push({
-              start,
-              end,
-              text: tokens[contentIdx].content
-            });
-            break;
-          }
-          contentIdx++;
-        }
-        return `<li data-position="${start}-${end}">`;
-      }
-      return '<li>';
-    };
-
     // テーブルセルにposition属性を追加
     this.markdown.renderer.rules.th_open = (tokens: Token[], idx: number) => {
       const token = tokens[idx];
@@ -139,7 +109,7 @@ class PositionTrackingMarp extends Marp {
       
       if (token.map) {
         const [start, end] = token.map;
-        if (contentToken && contentToken.content) {
+        if (contentToken && contentToken.content !== undefined) {
           this.positions.push({
             start,
             end,
@@ -157,7 +127,7 @@ class PositionTrackingMarp extends Marp {
       
       if (token.map) {
         const [start, end] = token.map;
-        if (contentToken && contentToken.content) {
+        if (contentToken && contentToken.content !== undefined) {
           this.positions.push({
             start,
             end,
@@ -170,7 +140,7 @@ class PositionTrackingMarp extends Marp {
     };
 
     // コードブロックにposition属性を追加
-    this.markdown.renderer.rules.fence = (tokens: Token[], idx: number, options, env, slf) => {
+    this.markdown.renderer.rules.fence = (tokens: Token[], idx: number, options: any, env: any, slf: any) => {
       const token = tokens[idx];
       
       if (token.map) {
@@ -192,7 +162,7 @@ class PositionTrackingMarp extends Marp {
     };
 
     // 画像にposition属性を追加
-    this.markdown.renderer.rules.image = (tokens: Token[], idx: number, options, env, slf) => {
+    this.markdown.renderer.rules.image = (tokens: Token[], idx: number, options: any, env: any, slf: any) => {
       const token = tokens[idx];
       
       if (token.map) {
@@ -214,16 +184,6 @@ class PositionTrackingMarp extends Marp {
     };
   }
 
-  render(markdown: string, env: HTMLAsArray): RenderResult<string[]>;
-  render(markdown: string, env?: any): RenderResult<string>;
-  render(markdown: string, env?: any) {
-    // 位置情報をリセット
-    this.positions = [];
-    
-    // 元のrenderメソッドを呼び出す
-    return super.render(markdown, env);
-  }
-
   get positions(): ElementPosition[] {
     return this._positions;
   }
@@ -232,7 +192,13 @@ class PositionTrackingMarp extends Marp {
     this._positions = value;
   }
 
-  private _positions: ElementPosition[] = [];
+  render(markdown: string, env: HTMLAsArray): RenderResult<string[]>;
+  render(markdown: string, env?: any): RenderResult<string>;
+  render(markdown: string, env?: any): RenderResult<any> {
+    // 位置情報をリセット
+    this.positions = [];
+    return super.render(markdown, env);
+  }
 
   private getListItemContent(tokens: Token[], idx: number): string | undefined {
     let contentIdx = idx + 1;
@@ -240,12 +206,12 @@ class PositionTrackingMarp extends Marp {
     
     // リスト項目の終了タグまでの間にあるすべてのコンテンツを結合
     while (contentIdx < tokens.length && tokens[contentIdx].type !== 'list_item_close') {
-      if (tokens[contentIdx].type === 'inline' && tokens[contentIdx].content) {
+      if (tokens[contentIdx].type === 'inline' && tokens[contentIdx].content !== undefined) {
         content += tokens[contentIdx].content;
       } else if (tokens[contentIdx].type === 'paragraph_open') {
         // 次のトークンがparagraph_openの場合、その次のトークンがinlineでコンテンツを持っている可能性がある
         const nextIdx = contentIdx + 1;
-        if (nextIdx < tokens.length && tokens[nextIdx].type === 'inline' && tokens[nextIdx].content) {
+        if (nextIdx < tokens.length && tokens[nextIdx].type === 'inline' && tokens[nextIdx].content !== undefined) {
           content += tokens[nextIdx].content;
         }
       }
