@@ -169,7 +169,10 @@ export default function LandingPage() {
                 transition={{ duration: 0.5, delay: 0.4 }}
                 className="text-xl md:text-2xl text-gray-300 mb-8 leading-relaxed"
               >
-                <span className="text-white font-semibold">アイデアを入力するだけで</span>、AIが<br className="hidden md:block" />
+                <span className="text-white font-semibold">アイデアを入力するだけで</span>、<wbr />
+                <span className="inline sm:hidden"><br /></span>
+                AIが<span className="hidden sm:inline md:hidden"><br /></span>
+                <span className="hidden md:inline">　</span>
                 美しいプレゼンテーションに変換。<br />
                 <span className="text-purple-300">思考から表現へ</span>、瞬時に。
               </motion.p>
@@ -362,7 +365,8 @@ export default function LandingPage() {
                                   className="pointer-events-none cursor-default"
                                 >
                                   <div className="text-sm sm:text-xl font-bold text-center mb-2 sm:mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300">
-                                    プレゼンテーション<br />タイトル
+                                    <span className="inline-block">プレゼンテーション</span><br className="xs:hidden sm:hidden md:inline" />
+                                    <span className="inline-block">タイトル</span>
                                   </div>
                                 </motion.div>
                                 
@@ -374,7 +378,7 @@ export default function LandingPage() {
                                   className="space-y-2 sm:space-y-3 pointer-events-none cursor-default"
                                 >
                                   {/* サブタイトル */}
-                                  <div className="text-xs sm:text-sm font-medium text-purple-300 mb-1 sm:mb-2 pointer-events-none cursor-default">主なポイント</div>
+                                  <div className="text-xs sm:text-sm font-medium text-purple-300 mb-1 sm:mb-2 text-center sm:text-left">主なポイント</div>
                                   
                                   {/* 箇条書き */}
                                   <div className="flex items-start gap-1 sm:gap-2 pointer-events-none cursor-default">
@@ -485,15 +489,15 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 3 }}
-                className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full py-2 px-4 flex items-center gap-3"
+                className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full py-1.5 px-3 flex items-center gap-2 text-xs"
               >
-                <span className="text-xs text-gray-300">Powered by</span>
-                <div className="flex items-center gap-3">
-                  <div className="text-blue-400 font-medium text-sm">React</div>
+                <span className="text-[10px] text-gray-300 opacity-80">Powered by</span>
+                <div className="flex items-center gap-2">
+                  <div className="text-blue-400 font-medium text-xs">React</div>
                   <div className="w-1 h-1 rounded-full bg-gray-500"></div>
-                  <div className="text-green-400 font-medium text-sm">Next.js</div>
+                  <div className="text-green-400 font-medium text-xs">Next.js</div>
                   <div className="w-1 h-1 rounded-full bg-gray-500"></div>
-                  <div className="text-purple-400 font-medium text-sm">AI</div>
+                  <div className="text-purple-400 font-medium text-xs">AI</div>
                 </div>
               </motion.div>
             </motion.div>
